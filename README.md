@@ -118,9 +118,13 @@ The system uses a weekly pricing model, aligned with gig worker income patterns.
 Example Plans
 
 Plan	   | Weekly Premium	  | Coverage
+
 Basic	   |     ₹25	        | ₹300
+
 Standard |     ₹40	        | ₹500
+
 Premium	 |     ₹60	        | ₹700
+
 
 Premiums are adjusted based on the risk level of the worker’s location.
 
@@ -131,8 +135,11 @@ The system uses measurable conditions to trigger payouts.
 Example Conditions: 
 
 Event	          |        Trigger
+
 Heavy Rain	    |   Rainfall > 50 mm
+
 Extreme Heat	  |   Temperature > 42°C
+
 High Pollution	|    AQI > 300
 
 When these conditions are met, compensation is automatically initiated.
