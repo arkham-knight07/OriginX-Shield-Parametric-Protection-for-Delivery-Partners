@@ -229,12 +229,13 @@ Python for risk analysis and anomaly detection
 Razorpay (sandbox mode)
 
 **13. System Architecture**
-
+![PHOTO-2026-03-20-21-27-40](https://github.com/user-attachments/assets/9107d99c-d7ef-4b40-bc98-940dc99d9e12)
 
 
 This architecture shows how different components of the system interact, including user applications, backend services, AI modules, external APIs, and payment systems.
 
 **13. Workflow Diagram**
+![PHOTO-2026-03-20-21-37-15](https://github.com/user-attachments/assets/97824b2b-dddb-4aa1-9db9-ee80a4e600ad)
 
 
 **14. Development Plan**
