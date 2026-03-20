@@ -1,4 +1,4 @@
-**OriginX – Parametric Insurance for Food Delivery Workers**
+**OriginX – GigShield – AI Parametric Insurance for Food Delivery Workers**
 
 Guidewire DEVTrails Hackathon 2026
 
@@ -9,7 +9,7 @@ Guidewire DEVTrails Hackathon 2026
 3. RAMYA PATHAK
 4. ARYABRATA KUNDU
 
-**1. Overview**
+**1. Introduction**
 
 Food delivery partners working with platforms like Swiggy and Zomato depend on daily deliveries for their income. Since their work is completely outdoor-based, it is highly affected by environmental and external conditions.
 
@@ -22,7 +22,7 @@ Our project proposes a parametric insurance platform that automatically compensa
 
 **2. Problem Statement**
 
-Gig delivery workers face unstable income due to factors beyond their control.
+Gig workers face income instability due to external conditions that are beyond their control.
 
 Common issues include:
 
@@ -30,95 +30,130 @@ Common issues include:
 
 . Flooded roads are making travel unsafe
 
-. Extreme heat is reducing working hours
+. Extreme heat is reducing work hours
 
-. Poor air quality is affecting outdoor work
+. High pollution is affecting outdoor activity
 
-. Local restrictions or curfews
+. Local curfews or area shutdowns
 
-These events can reduce a worker’s earnings by up to 20–30%.
+These disruptions can reduce earnings by 20–30%, and workers receive no compensation.
 
+Traditional insurance does not solve this problem because:
 
-3. Proposed Solution
+. It does not cover income loss
 
-We are building an AI-based parametric insurance system.
+. It requires manual claims
 
-Instead of requiring workers to manually apply for claims, the system:
+. It has slow payout cycles
 
-monitors external conditions continuously
+**3. Proposed Solution**
 
-detects disruption events automatically
+GigShield is an AI-powered parametric insurance platform designed specifically for food delivery workers.
 
-triggers compensation instantly
+The system works automatically:
+
+. Workers subscribe to a weekly insurance plan
+
+. The platform monitors real-time external conditions
+
+. When a disruption crosses a defined threshold, a claim is triggered automatically
+
+. The worker receives compensation instantly
 
 Workers subscribe to a weekly insurance plan, and when conditions cross predefined thresholds, they receive payouts without any manual process.
 
+**4. Key Innovation**
 
-4. Target Persona
+Most systems rely only on GPS to verify worker location, but GPS can be easily spoofed.
 
-Our focus is on food delivery partners in urban areas.
+GigShield introduces a multi-layer verification system that combines:
+
+. Location validation from multiple sources
+
+. Delivery platform activity verification
+
+. AI-based anomaly detection
+
+. Controlled payout mechanism
+
+This ensures that only genuine workers receive payouts, making the system reliable and fraud-resistant.
+
+
+**5. Target Persona**
+
+Our solution focuses on food delivery workers in urban areas.
 
 Example Scenario
 
-A delivery partner working in Chennai experiences heavy rainfall during working hours. Due to waterlogged roads and reduced orders, the number of deliveries drops.
+A delivery partner in Chennai is working during heavy rainfall. Due to flooded roads and reduced orders, the worker loses several hours of work.
 
-As a result, the worker loses part of their daily income.
+GigShield detects that rainfall exceeds the defined threshold and verifies that the worker was active during that time.
 
-With our system, when rainfall crosses a certain level, the platform automatically compensates the worker for the lost earning opportunity.
-
-
-
-**5. Application Workflow**
-
-The system works as follows:
-
-1. The worker registers on the platform
-
-2. The system calculates a weekly premium based on location risk
-
-3. The worker selects a plan and activates coverage
-
-4. The platform continuously monitors external conditions
-
-5. When a disruption crosses a defined threshold, a claim is triggered automatically
-
-6. The system verifies the worker’s activity and location
-
-7. The payout is processed instantly
-<img width="1536" height="1024" alt="Image Mar 18, 2026, 08_45_23 AM" src="https://github.com/user-attachments/assets/59a07843-4698-4d22-bdab-d7f1cae81bc3" />
+The system then automatically compensates the worker for the lost income.
 
 
+**6. Application Workflow**
+
+ The system works as follows:
+
+1. Worker registers on the platform
+
+2. The system calculates the weekly premium based on risk
+
+3. Worker subscribes to an insurance plan
+
+4. Platform continuously monitors external conditions
+
+5. When a disruption threshold is crossed, a claim is triggered
+
+6. Multi-layer verification checks are performed
+
+7. If valid, payout is processed instantly
 
 
-**6. Weekly Premium Model**
+**7. Weekly Premium Model**
 
-The insurance model is designed every week, matching the earning pattern of gig workers.
+The system uses a weekly pricing model, aligned with gig worker income patterns.
 
-Example Plans:
+Example Plans
 
-Plan	  Weekly Cost  	Coverage
-Basic	     ₹25	        ₹300
-Standard	 ₹40	        ₹500
-Premium	   ₹60	        ₹700
+Plan	   | Weekly Premium	  | Coverage
+Basic	   |     ₹25	        | ₹300
+Standard |     ₹40	        | ₹500
+Premium	 |     ₹60	        | ₹700
 
+Premiums are adjusted based on the risk level of the worker’s location.
 
-The premium can vary depending on the risk level of the worker’s location.
-
-**7. Parametric Triggers**
+**8. Parametric Triggers**
 
 The system uses measurable conditions to trigger payouts.
 
 Example Conditions: 
 
-Event	               Trigger
-Heavy Rain	     Rainfall > 50 mm
-Extreme Heat	   Temperature > 42°C
-High Pollution	    AQI > 300
+Event	          |        Trigger
+Heavy Rain	    |   Rainfall > 50 mm
+Extreme Heat	  |   Temperature > 42°C
+High Pollution	|    AQI > 300
 
 When these conditions are met, compensation is automatically initiated.
 
+**9. Fraud Prevention Strategy**
 
-**8. Platform Choice**
+Instead of relying only on GPS, GigShield uses a multi-layer fraud prevention approach:
+
+. Device validation to detect spoofing or suspicious apps
+
+. Multi-source location verification (GPS + network signals)
+
+. Delivery platform activity check (active orders or recent work)
+
+. AI-based anomaly detection for unusual claim patterns
+
+. Controlled payout system with partial escrow
+
+This approach significantly reduces the chances of fraudulent claims and ensures system reliability.
+
+**10. Platform Choice**
 
 We are developing a web-based platform for this project.
 
@@ -133,36 +168,38 @@ Reason:
 A mobile application can be considered for future development.
 
 
-**9. AI / ML Integration**
+**11. AI / ML Integration**
 
-AI is used in two main areas:
+AI is used in two main areas of the system to make it both adaptive and reliable.
 
 **Risk Assessment**
 
 The system analyzes:
 
-. historical weather data
+. Historical weather data
 
-. location-based risks
+. Location-based environmental risks
 
-. frequency of disruptions
+. Frequency of past disruptions in a specific area
 
-Based on this, it assigns a risk score to each area and adjusts premiums accordingly.
+Based on these factors, it assigns a risk score to each location.
+This risk score is then used to dynamically adjust the weekly premium, ensuring that pricing reflects real-world conditions.
 
 **Fraud Detection**
 
-To prevent misuse, the system checks:
+To prevent misuse of the system, AI is used to identify suspicious or abnormal behavior.
 
-. location data consistency
+The system checks:
 
-. claim frequency patterns
+Consistency of location data across multiple sources
 
-. mismatch between actual events and user activity
+Claim frequency patterns of individual users
 
-This helps in identifying suspicious or invalid claims.
+Mismatch between actual disruption events and user activity
 
+If unusual patterns are detected, the claim is either flagged for review or temporarily held, reducing the chances of fraudulent payouts.
 
-**10. Technology Stack**
+**12. Technology Stack**
 
 
 **Frontend**
@@ -182,52 +219,54 @@ Pollution API (AQI)
 Python for risk analysis and anomaly detection
 
 **Payments**
-Razorpay (test mode)
+Razorpay (sandbox mode)
 
-**11. System Architecture**
+**13. System Architecture**
 
-![PHOTO-2026-03-16-12-43-16](https://github.com/user-attachments/assets/32ff6466-956e-4253-a8ec-9492e71bdb83)
+
 
 This architecture shows how different components of the system interact, including user applications, backend services, AI modules, external APIs, and payment systems.
 
+**13. Workflow Diagram**
 
-**12. Development Plan**
+
+**14. Development Plan**
 
 **Phase 1 – Ideation**
 
-Research and problem understanding
+. Research and problem understanding
 
-Persona selection
+. Persona selection
 
-System design
+. System design
 
-AI planning
+. AI planning
 
-Repository setup
+. Repository setup
 
 **Phase 2 – Core Features**
 
-User registration
+. User registration
 
-Policy creation
+. Policy creation
 
-Premium calculation
+. Premium calculation
 
-Disruption detection
+. Disruption detection
 
-Claim system
+. Claim system
 
 **Phase 3 – Enhancement**
 
-Advanced fraud detection
+. Advanced fraud detection
 
-Payment integration
+. Payment integration
 
-Dashboard for users and admin
+. Dashboard for users and admin
 
-Predictive insights
+. Predictive insights
 
-**13. Additional Notes**
+**15. Additional Notes**
 
 The system focuses only on income loss, not health or vehicle damage
 
@@ -235,5 +274,5 @@ The claim process is fully automated
 
 The solution is scalable to other gig worker categories in the future
 
-**14. Demo Video**
+**16. Demo Video**
 
