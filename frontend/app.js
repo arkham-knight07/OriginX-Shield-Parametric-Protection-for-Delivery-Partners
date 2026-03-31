@@ -35,7 +35,7 @@ async function requestJson(path) {
   const response = await fetch(`${baseUrl}${path}`);
   const data = await parseJsonSafely(response);
   if (!response.ok) {
-    throw new Error((data && data.message) || `Request failed with status ${response.status}.`);
+    throw new Error((data && data.message) || `Request to ${path} failed with status ${response.status}.`);
   }
   return data;
 }
@@ -48,8 +48,9 @@ saveApiBaseUrlButton.addEventListener('click', () => {
 healthCheckButton.addEventListener('click', async () => {
   try {
     const baseUrl = getApiBaseUrl();
-    const backendRootUrl = baseUrl.endsWith('/api') ? baseUrl.slice(0, -4) : baseUrl;
-    const response = await fetch(`${backendRootUrl}/api/health`);
+    const parsedApiUrl = new URL(baseUrl);
+    parsedApiUrl.pathname = '/api/health';
+    const response = await fetch(parsedApiUrl.toString());
     const data = await parseJsonSafely(response);
     if (!response.ok) {
       throw new Error((data && data.message) || `Health check failed with status ${response.status}.`);
