@@ -125,13 +125,11 @@ The system uses a weekly pricing model, aligned with gig worker income patterns.
 
 Example Plans
 
-Plan	   | Weekly Premium	  | Coverage
-
-Basic	   |     ₹25	        | ₹300
-
-Standard |     ₹40	        | ₹500
-
-Premium	 |     ₹60	        | ₹700
+| Plan | Weekly Premium | Coverage |
+|---|---:|---:|
+| Basic | ₹25 | ₹300 |
+| Standard | ₹40 | ₹500 |
+| Premium | ₹60 | ₹700 |
 
 
 Premiums are adjusted based on:
@@ -474,6 +472,22 @@ It runs:
 ### Insurance Claim
 - `POST /api/insurance-claims/submit`
 - `GET /api/insurance-claims/:claimId`
+
+Tiny claim submission payload example:
+
+```json
+{
+  "deliveryPartnerId": "65f0c2a1b8d4ef0012345678",
+  "triggeringDisruptionEventId": "65f0c2a1b8d4ef0012345679",
+  "currentEnvironmentalConditions": {
+    "rainfallInMillimetres": 62,
+    "lpgShortageSeverityIndex": 78
+  },
+  "partnerLocationAtDisruptionTime": { "latitude": 13.0827, "longitude": 80.2707 },
+  "networkSignalCoordinates": { "latitude": 13.083, "longitude": 80.271 },
+  "minutesActiveOnDeliveryPlatform": 45
+}
+```
 
 ### Health
 - `GET /api/health`
