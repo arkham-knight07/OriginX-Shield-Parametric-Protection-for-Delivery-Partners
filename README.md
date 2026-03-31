@@ -359,3 +359,147 @@ Key API outputs for verification:
 
 - `POST /api/insurance-policies/subscribe` now returns `pricingJustification`
 - `GET /api/insurance-policies/metadata/pricing-model` returns exclusions, loss-ratio guardrails, and IRDAI deployment note
+
+## 20. Frontend Implementation (React + Tailwind CSS)
+
+The frontend is now implemented in React with Tailwind CSS and includes all primary user flows:
+
+- Delivery partner registration
+- Plan subscription
+- Claim submission
+- Policy/claim tracking dashboard
+- Validation + loading + error feedback UX
+
+Frontend location:
+
+- `frontend/src/App.jsx` (main app + flow forms)
+- `frontend/src/index.css` (Tailwind entry)
+- `frontend/tailwind.config.js`
+- `frontend/postcss.config.js`
+
+Run frontend locally:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Build and test frontend:
+
+```bash
+npm run test
+npm run build
+```
+
+## 21. Backend Hardening Updates
+
+The backend now includes production-hardening foundations:
+
+1. Authentication/authorization scaffolding
+   - `POST /api/auth/token` issues JWT token
+   - Optional route protection via `ENFORCE_AUTH=true`
+   - Middleware:
+     - `backend/middleware/authMiddleware.js`
+     - `backend/middleware/optionalAuth.js`
+
+2. Request validation middleware
+   - `backend/middleware/validationMiddleware.js`
+   - Validators in `backend/validators/requestValidators.js`
+   - Applied to delivery partner, policy, and claim routes
+
+3. Payout wiring abstraction
+   - `backend/services/payoutService.js`
+   - Supports `PAYOUT_MODE=mock|disabled` and claim payout hook integration
+
+4. Observability/logging and resilience
+   - `helmet` security headers
+   - `morgan` request logging to structured logger
+   - `backend/utils/logger.js`
+   - Retry helper `backend/services/retryExecutor.js`
+
+## 22. Quality, Tests, and CI/CD
+
+### Backend tests
+
+```bash
+cd backend
+npm install
+npm test
+```
+
+Includes new tests for:
+
+- auth enforcement middleware
+- request validation behavior
+- retry execution behavior
+
+### Frontend tests
+
+```bash
+cd frontend
+npm install
+npm run test
+```
+
+### CI workflow
+
+A CI workflow is added at:
+
+- `.github/workflows/ci.yml`
+
+It runs:
+- backend install + tests
+- frontend install + tests + build
+
+## 23. API Reference (Current)
+
+### Auth
+- `POST /api/auth/token`
+
+### Delivery Partner
+- `POST /api/delivery-partners/register`
+- `GET /api/delivery-partners/:partnerId`
+
+### Insurance Policy
+- `POST /api/insurance-policies/subscribe`
+- `GET /api/insurance-policies/metadata/pricing-model`
+- `GET /api/insurance-policies/:policyId`
+
+### Insurance Claim
+- `POST /api/insurance-claims/submit`
+- `GET /api/insurance-claims/:claimId`
+
+### Health
+- `GET /api/health`
+
+## 24. Database Models (MongoDB/Mongoose)
+
+Defined in:
+
+- `backend/models/DeliveryPartner.js`
+- `backend/models/InsurancePolicy.js`
+- `backend/models/InsuranceClaim.js`
+- `backend/models/DisruptionEvent.js`
+
+These models cover partner onboarding, weekly policy lifecycle, claim lifecycle, and disruption triggers.
+
+## 25. Deployment and Secrets Guide
+
+Minimum production env vars:
+
+- `MONGODB_URI`
+- `PORT`
+- `JWT_SECRET_KEY`
+- `ENFORCE_AUTH` (`true`/`false`)
+- `AUTH_DEMO_USERNAME` (for prototype auth endpoint)
+- `AUTH_DEMO_PASSWORD_HASH` (preferred) or `AUTH_DEMO_PASSWORD`
+- `PAYOUT_MODE` (`mock` for prototype, replace with real gateway integration mode later)
+- `WEATHER_API_KEY`
+- `POLLUTION_API_KEY`
+
+Security notes:
+
+- Do not hardcode secrets in code
+- Use GitHub repository secrets for CI/CD
+- Use environment-level secret stores in deployment platform
