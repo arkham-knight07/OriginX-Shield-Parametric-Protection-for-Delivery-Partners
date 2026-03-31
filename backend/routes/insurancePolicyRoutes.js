@@ -24,8 +24,10 @@ const {
 } = require('../validators/requestValidators');
 const { validateIncomingRequest } = require('../middleware/validationMiddleware');
 const { requireAuthIfEnabled } = require('../middleware/optionalAuth');
+const { createInMemoryRateLimiter } = require('../middleware/rateLimitMiddleware');
 
 const insurancePolicyRouter = express.Router();
+const apiRateLimiter = createInMemoryRateLimiter();
 
 /**
  * POST /api/insurance-policies/subscribe
@@ -36,6 +38,7 @@ const insurancePolicyRouter = express.Router();
  */
 insurancePolicyRouter.post(
   '/subscribe',
+  apiRateLimiter,
   requireAuthIfEnabled,
   subscribePolicyValidators,
   validateIncomingRequest,
@@ -114,6 +117,7 @@ insurancePolicyRouter.post(
  */
 insurancePolicyRouter.get(
   '/metadata/pricing-model',
+  apiRateLimiter,
   requireAuthIfEnabled,
   (request, response) => {
   return response.status(200).json({
@@ -133,6 +137,7 @@ insurancePolicyRouter.get(
  */
 insurancePolicyRouter.get(
   '/:policyId',
+  apiRateLimiter,
   requireAuthIfEnabled,
   policyIdParamValidators,
   validateIncomingRequest,

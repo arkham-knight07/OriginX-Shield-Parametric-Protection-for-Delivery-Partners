@@ -15,8 +15,10 @@ const {
 } = require('../validators/requestValidators');
 const { validateIncomingRequest } = require('../middleware/validationMiddleware');
 const { requireAuthIfEnabled } = require('../middleware/optionalAuth');
+const { createInMemoryRateLimiter } = require('../middleware/rateLimitMiddleware');
 
 const insuranceClaimRouter = express.Router();
+const apiRateLimiter = createInMemoryRateLimiter();
 
 /**
  * POST /api/insurance-claims/submit
@@ -27,6 +29,7 @@ const insuranceClaimRouter = express.Router();
  */
 insuranceClaimRouter.post(
   '/submit',
+  apiRateLimiter,
   requireAuthIfEnabled,
   submitClaimValidators,
   validateIncomingRequest,
@@ -85,6 +88,7 @@ insuranceClaimRouter.post(
  */
 insuranceClaimRouter.get(
   '/:claimId',
+  apiRateLimiter,
   requireAuthIfEnabled,
   claimIdParamValidators,
   validateIncomingRequest,

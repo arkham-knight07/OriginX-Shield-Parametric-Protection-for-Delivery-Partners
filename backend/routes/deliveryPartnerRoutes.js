@@ -14,8 +14,10 @@ const {
 } = require('../validators/requestValidators');
 const { validateIncomingRequest } = require('../middleware/validationMiddleware');
 const { requireAuthIfEnabled } = require('../middleware/optionalAuth');
+const { createInMemoryRateLimiter } = require('../middleware/rateLimitMiddleware');
 
 const deliveryPartnerRouter = express.Router();
+const apiRateLimiter = createInMemoryRateLimiter();
 
 /**
  * POST /api/delivery-partners/register
@@ -26,6 +28,7 @@ const deliveryPartnerRouter = express.Router();
  */
 deliveryPartnerRouter.post(
   '/register',
+  apiRateLimiter,
   requireAuthIfEnabled,
   deliveryPartnerRegistrationValidators,
   validateIncomingRequest,
@@ -89,6 +92,7 @@ deliveryPartnerRouter.post(
  */
 deliveryPartnerRouter.get(
   '/:partnerId',
+  apiRateLimiter,
   requireAuthIfEnabled,
   deliveryPartnerIdParamValidators,
   validateIncomingRequest,
