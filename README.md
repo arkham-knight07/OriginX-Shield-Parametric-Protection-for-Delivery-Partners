@@ -79,6 +79,16 @@ This ensures that only genuine workers receive payouts, making the system reliab
 
 Our solution focuses on food delivery workers in urban areas.
 
+Persona Income Bands Used in the Model
+
+| Persona Segment | Monthly Earnings (INR) | Typical Daily Earnings (INR) | Risk Context |
+|---|---:|---:|---|
+| Entry-level | 15,000 – 22,000 | 700 | Limited buffer against 1–2 missed days |
+| Mid-tier | 22,000 – 32,000 | 1,000 | Moderate earnings stability with periodic disruption risk |
+| High-activity | 32,000 – 45,000 | 1,400 | Higher exposure from longer active hours and peak-time dependence |
+
+These earnings bands are now configurable in backend constants and are used to explain coverage suitability.
+
 Example Scenario
 
 A delivery partner in Chennai is working during heavy rainfall. Due to flooded roads and reduced orders, the worker loses several hours of work.
@@ -124,7 +134,21 @@ Standard |     ₹40	        | ₹500
 Premium	 |     ₹60	        | ₹700
 
 
-Premiums are adjusted based on the risk level of the worker’s location.
+Premiums are adjusted based on:
+
+1. Location risk multiplier (low to very-high risk zone)
+2. Platform-specific multiplier (Swiggy, Zomato, Dunzo, Blinkit, Other)
+3. Earnings-band context (to evaluate whether coverage is meaningful relative to weekly earnings)
+4. Loss-ratio guardrails (to avoid underpricing/overpricing)
+
+Pricing Justification Logic (now implemented in backend):
+
+- Weekly earnings estimate = average daily earnings × 6 working days
+- Suggested coverage benchmark = 50% of weekly earnings estimate
+- Projected loss ratio = expected weekly payout / weekly premium
+- Target loss ratio = 0.65 (with sustainable guardrails 0.40 to 0.80)
+
+The policy subscription response now includes a `pricingJustification` object so premium and coverage decisions are transparent.
 
 **8. Parametric Triggers**
 
@@ -304,6 +328,35 @@ https://youtu.be/qJf-wKjICPI
 
 **18. Regulatory Considerations**
 
-GigShield is designed as a prototype system. In real-world deployment, it would operate under IRDAI regulations by partnering with licensed insurance providers. Standard compliance requirements, such as pricing validation, claim transparency, and defined coverage exclusions, would be incorporated.
+GigShield is designed as a prototype system. In real-world deployment, it would operate under IRDAI regulations by partnering with licensed insurance providers.
 
+Current compliance-oriented improvements in the prototype:
+
+- Explicit regulatory note exposed in policy metadata endpoint
+- Explicit exclusions declared and wired into claim processing
+- Loss-ratio tracking at policy enrollment to support pricing audits
+- Transparent pricing justification returned at subscription time
+
+Standard exclusions now declared in model/config:
+
+- War or hostile operations (`war_or_hostilities`)
+- Pandemic or epidemic events (`pandemic_or_epidemic`)
+
+These exclusions are represented as policy metadata and can block claim processing when a disruption event is tagged with an exclusion.
+
+**19. How to Modify the Model Later (Change-Friendly Setup)**
+
+To tune the model without deep code changes, update:
+
+- `backend/config/parametricInsuranceConstants.js`
+  - `DELIVERY_PARTNER_PERSONA_EARNINGS_BANDS`
+  - `PLATFORM_RISK_PREMIUM_MULTIPLIERS`
+  - `PREMIUM_MODEL_ASSUMPTIONS`
+  - `LOSS_RATIO_GUARDRAILS`
+  - `COVERAGE_EXCLUSIONS`
+
+Key API outputs for verification:
+
+- `POST /api/insurance-policies/subscribe` now returns `pricingJustification`
+- `GET /api/insurance-policies/metadata/pricing-model` returns exclusions, loss-ratio guardrails, and IRDAI deployment note
 
