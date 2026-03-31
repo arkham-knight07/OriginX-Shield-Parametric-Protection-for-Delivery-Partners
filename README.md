@@ -359,3 +359,79 @@ Key API outputs for verification:
 
 - `POST /api/insurance-policies/subscribe` now returns `pricingJustification`
 - `GET /api/insurance-policies/metadata/pricing-model` returns exclusions, loss-ratio guardrails, and IRDAI deployment note
+
+## 20. Frontend Kickoff (Started)
+
+The backend APIs and core model logic are in place.  
+To start frontend implementation immediately, a minimal web UI scaffold is now added under:
+
+- `frontend/index.html`
+- `frontend/styles.css`
+- `frontend/app.js`
+
+This starter UI helps the team quickly:
+
+1. Understand available API flows
+2. Configure backend API base URL from the browser
+3. Try health checks and sample requests while building full React screens later
+
+> Current scaffold is intentionally lightweight (plain HTML/CSS/JS) so the team can align on UX and API integration before final framework-heavy implementation.
+
+## 21. What Is Left to Complete the Project
+
+### A) Frontend Work (Primary Pending Area)
+
+- Build full user flows:
+  - Delivery partner registration
+  - Policy subscription with plan selection
+  - Claim submission
+  - Claim/policy status tracking dashboard
+- Add form validations and user-friendly error states
+- Add loading and retry handling for API/network failures
+- Add role-based screens (partner/admin) if needed for review workflows
+
+### B) Backend Items Still Needed for Production Readiness
+
+- Authentication and authorization (currently open APIs)
+- Request validation middleware for all route payloads
+- Real payment/payout integration flow completion (Razorpay sandbox -> production flow)
+- Background/scheduled disruption ingestion pipeline hardening
+- Better operational logging and error observability
+
+### C) Data, AI, and Automation
+
+- Train and evaluate anomaly/risk models using larger real-world datasets
+- Add model monitoring and drift checks
+- Add auto-trigger orchestration for large-area disruptions with safe rate controls
+
+### D) Quality, Security, and DevOps
+
+- API integration tests (end-to-end flows)
+- Frontend unit/integration tests once full UI is built
+- CI pipeline for lint/test/build
+- Deployment setup (backend + frontend + MongoDB + secrets management)
+- Security hardening: auth, rate limits, audit trails, and compliance artifacts
+
+### E) Documentation and Team Handover
+
+- Keep API contracts/versioning synchronized with frontend usage
+- Maintain architecture and workflow docs as modules evolve
+- Add deployment runbook and incident response notes
+
+## 22. Team Quickstart
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm test
+npm run dev
+```
+
+Default backend URL: `http://localhost:5000`
+
+### Frontend Starter
+
+Open `frontend/index.html` in browser (or serve folder using any static server).  
+Set API base URL in UI (default: `http://localhost:5000/api`) and use quick actions to test connectivity.
