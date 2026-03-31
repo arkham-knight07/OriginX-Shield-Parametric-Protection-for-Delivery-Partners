@@ -10,6 +10,7 @@ const {
   isRainfallAboveHeavyRainThreshold,
   isTemperatureAboveExtremeHeatThreshold,
   isAirQualityIndexAboveHazardousThreshold,
+  isLpgShortageSeverityAboveThreshold,
   identifyTriggeredDisruptionEventTypes,
   calculateDisruptionSeverityRatio,
   determineCompensationAmountForDisruption,
@@ -59,29 +60,47 @@ describe('isAirQualityIndexAboveHazardousThreshold', () => {
   });
 });
 
+describe('isLpgShortageSeverityAboveThreshold', () => {
+  test('returns true when LPG shortage severity exceeds 70 threshold', () => {
+    expect(isLpgShortageSeverityAboveThreshold(80)).toBe(true);
+  });
+
+  test('returns false when LPG shortage severity is exactly at the 70 threshold', () => {
+    expect(isLpgShortageSeverityAboveThreshold(70)).toBe(false);
+  });
+
+  test('returns false when LPG shortage severity is below threshold', () => {
+    expect(isLpgShortageSeverityAboveThreshold(40)).toBe(false);
+  });
+});
+
 describe('identifyTriggeredDisruptionEventTypes', () => {
   test('returns heavy rainfall type when only rainfall threshold is exceeded', () => {
     const triggeredTypes = identifyTriggeredDisruptionEventTypes({
       rainfallInMillimetres: 80,
       temperatureInCelsius: 30,
       airQualityIndex: 100,
+      lpgShortageSeverityIndex: 20,
     });
 
     expect(triggeredTypes).toContain(DISRUPTION_EVENT_TYPES.HEAVY_RAINFALL);
     expect(triggeredTypes).not.toContain(DISRUPTION_EVENT_TYPES.EXTREME_HEAT);
     expect(triggeredTypes).not.toContain(DISRUPTION_EVENT_TYPES.HAZARDOUS_AIR_QUALITY);
+    expect(triggeredTypes).not.toContain(DISRUPTION_EVENT_TYPES.LPG_SHORTAGE);
   });
 
-  test('returns all three types when all thresholds are exceeded simultaneously', () => {
+  test('returns all four types when all thresholds are exceeded simultaneously', () => {
     const triggeredTypes = identifyTriggeredDisruptionEventTypes({
       rainfallInMillimetres: 100,
       temperatureInCelsius: 45,
       airQualityIndex: 400,
+      lpgShortageSeverityIndex: 90,
     });
 
     expect(triggeredTypes).toContain(DISRUPTION_EVENT_TYPES.HEAVY_RAINFALL);
     expect(triggeredTypes).toContain(DISRUPTION_EVENT_TYPES.EXTREME_HEAT);
     expect(triggeredTypes).toContain(DISRUPTION_EVENT_TYPES.HAZARDOUS_AIR_QUALITY);
+    expect(triggeredTypes).toContain(DISRUPTION_EVENT_TYPES.LPG_SHORTAGE);
   });
 
   test('returns empty array when no thresholds are exceeded', () => {
@@ -89,6 +108,7 @@ describe('identifyTriggeredDisruptionEventTypes', () => {
       rainfallInMillimetres: 10,
       temperatureInCelsius: 25,
       airQualityIndex: 100,
+      lpgShortageSeverityIndex: 10,
     });
 
     expect(triggeredTypes).toHaveLength(0);
@@ -97,9 +117,11 @@ describe('identifyTriggeredDisruptionEventTypes', () => {
   test('ignores undefined environmental condition values', () => {
     const triggeredTypes = identifyTriggeredDisruptionEventTypes({
       temperatureInCelsius: 45,
+      lpgShortageSeverityIndex: 80,
     });
 
     expect(triggeredTypes).toContain(DISRUPTION_EVENT_TYPES.EXTREME_HEAT);
+    expect(triggeredTypes).toContain(DISRUPTION_EVENT_TYPES.LPG_SHORTAGE);
     expect(triggeredTypes).not.toContain(DISRUPTION_EVENT_TYPES.HEAVY_RAINFALL);
   });
 });

@@ -125,13 +125,11 @@ The system uses a weekly pricing model, aligned with gig worker income patterns.
 
 Example Plans
 
-Plan	   | Weekly Premium	  | Coverage
-
-Basic	   |     ₹25	        | ₹300
-
-Standard |     ₹40	        | ₹500
-
-Premium	 |     ₹60	        | ₹700
+| Plan | Weekly Premium | Coverage |
+|---|---:|---:|
+| Basic | ₹25 | ₹300 |
+| Standard | ₹40 | ₹500 |
+| Premium | ₹60 | ₹700 |
 
 
 Premiums are adjusted based on:
@@ -140,6 +138,7 @@ Premiums are adjusted based on:
 2. Platform-specific multiplier (Swiggy, Zomato, Dunzo, Blinkit, Other)
 3. Earnings-band context (to evaluate whether coverage is meaningful relative to weekly earnings)
 4. Loss-ratio guardrails (to avoid underpricing/overpricing)
+5. Short-term disruption pressure in operations, including fuel access stress scenarios like LPG shortages that can occur during PF war/geopolitical conflict periods and other supply-chain problems
 
 Pricing Justification Logic (now implemented in backend):
 
@@ -164,7 +163,11 @@ Extreme Heat	  |   Temperature > 42°C
 
 High Pollution	|    AQI > 300
 
+LPG Shortage  |    LPG Shortage Severity Index > 70
+
 When these conditions are met, compensation is automatically initiated.
+
+The LPG shortage trigger is intended for measurable city/zone-level fuel scarcity events (for example, supply disruption during PF war-linked shocks or other logistics bottlenecks) that reduce delivery partners' earning ability.
 
 **9. Fraud Prevention Strategy**
 
@@ -469,6 +472,34 @@ It runs:
 ### Insurance Claim
 - `POST /api/insurance-claims/submit`
 - `GET /api/insurance-claims/:claimId`
+
+Tiny claim submission payload example:
+
+```json
+{
+  "deliveryPartnerId": "65f0c2a1b8d4ef0012345678",
+  "triggeringDisruptionEventId": "65f0c2a1b8d4ef0012345679",
+  "currentEnvironmentalConditions": {
+    "rainfallInMillimetres": 62,
+    "lpgShortageSeverityIndex": 78
+  },
+  "partnerLocationAtDisruptionTime": { "latitude": 13.0827, "longitude": 80.2707 },
+  "networkSignalCoordinates": { "latitude": 13.083, "longitude": 80.271 },
+  "minutesActiveOnDeliveryPlatform": 45
+}
+```
+
+Minimum payload variant (essential fields only):
+
+```json
+{
+  "deliveryPartnerId": "65f0c2a1b8d4ef0012345678",
+  "triggeringDisruptionEventId": "65f0c2a1b8d4ef0012345679",
+  "partnerLocationAtDisruptionTime": { "latitude": 13.0827, "longitude": 80.2707 },
+  "networkSignalCoordinates": { "latitude": 13.083, "longitude": 80.271 },
+  "minutesActiveOnDeliveryPlatform": 45
+}
+```
 
 ### Health
 - `GET /api/health`

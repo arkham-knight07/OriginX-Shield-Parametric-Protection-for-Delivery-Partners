@@ -6,12 +6,14 @@
  *   - Rainfall threshold: 50 mm triggers compensation for heavy rain
  *   - Temperature threshold: 42 °C triggers compensation for extreme heat
  *   - AQI threshold: 300 triggers compensation for hazardous air quality
+ *   - LPG shortage index: 70 triggers compensation for fuel scarcity disruption
  */
 
 const DISRUPTION_TRIGGER_THRESHOLDS = {
   RAINFALL_MILLIMETRES: 50,
   TEMPERATURE_CELSIUS: 42,
   AIR_QUALITY_INDEX: 300,
+  LPG_SHORTAGE_SEVERITY_INDEX: 70,
 };
 
 /**
@@ -136,6 +138,7 @@ const DISRUPTION_EVENT_TYPES = {
   HEAVY_RAINFALL: 'heavy_rainfall',
   EXTREME_HEAT: 'extreme_heat',
   HAZARDOUS_AIR_QUALITY: 'hazardous_air_quality',
+  LPG_SHORTAGE: 'lpg_shortage',
   AREA_CURFEW: 'area_curfew',
   FLOODING: 'flooding',
 };

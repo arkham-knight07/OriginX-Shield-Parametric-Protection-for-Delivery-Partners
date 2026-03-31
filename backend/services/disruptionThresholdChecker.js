@@ -1,7 +1,7 @@
 /**
  * Disruption threshold checker service.
  *
- * Evaluates real-time environmental data (rainfall, temperature, AQI)
+ * Evaluates real-time environmental data (rainfall, temperature, AQI, LPG shortage index)
  * against the predefined parametric trigger thresholds and determines
  * whether the conditions qualify as a compensable disruption event.
  */
@@ -45,6 +45,18 @@ function isAirQualityIndexAboveHazardousThreshold(measuredAirQualityIndex) {
 }
 
 /**
+ * Checks whether the measured LPG shortage severity exceeds the
+ * parametric trigger threshold.
+ *
+ * @param {number} measuredLpgShortageSeverityIndex - Current LPG shortage severity index.
+ * @returns {boolean} True if LPG shortage severity exceeds the trigger threshold.
+ */
+function isLpgShortageSeverityAboveThreshold(measuredLpgShortageSeverityIndex) {
+  return measuredLpgShortageSeverityIndex
+    > DISRUPTION_TRIGGER_THRESHOLDS.LPG_SHORTAGE_SEVERITY_INDEX;
+}
+
+/**
  * Evaluates an environmental data reading and returns all disruption
  * event types whose thresholds have been exceeded.
  *
@@ -52,6 +64,7 @@ function isAirQualityIndexAboveHazardousThreshold(measuredAirQualityIndex) {
  * @param {number} [currentEnvironmentalConditions.rainfallInMillimetres]
  * @param {number} [currentEnvironmentalConditions.temperatureInCelsius]
  * @param {number} [currentEnvironmentalConditions.airQualityIndex]
+ * @param {number} [currentEnvironmentalConditions.lpgShortageSeverityIndex]
  * @returns {string[]} Array of DISRUPTION_EVENT_TYPES values that were triggered.
  */
 function identifyTriggeredDisruptionEventTypes(currentEnvironmentalConditions) {
@@ -61,6 +74,7 @@ function identifyTriggeredDisruptionEventTypes(currentEnvironmentalConditions) {
     rainfallInMillimetres,
     temperatureInCelsius,
     airQualityIndex,
+    lpgShortageSeverityIndex,
   } = currentEnvironmentalConditions;
 
   if (
@@ -82,6 +96,13 @@ function identifyTriggeredDisruptionEventTypes(currentEnvironmentalConditions) {
     isAirQualityIndexAboveHazardousThreshold(airQualityIndex)
   ) {
     triggeredDisruptionTypes.push(DISRUPTION_EVENT_TYPES.HAZARDOUS_AIR_QUALITY);
+  }
+
+  if (
+    lpgShortageSeverityIndex !== undefined &&
+    isLpgShortageSeverityAboveThreshold(lpgShortageSeverityIndex)
+  ) {
+    triggeredDisruptionTypes.push(DISRUPTION_EVENT_TYPES.LPG_SHORTAGE);
   }
 
   return triggeredDisruptionTypes;
@@ -132,6 +153,7 @@ module.exports = {
   isRainfallAboveHeavyRainThreshold,
   isTemperatureAboveExtremeHeatThreshold,
   isAirQualityIndexAboveHazardousThreshold,
+  isLpgShortageSeverityAboveThreshold,
   identifyTriggeredDisruptionEventTypes,
   calculateDisruptionSeverityRatio,
   determineCompensationAmountForDisruption,

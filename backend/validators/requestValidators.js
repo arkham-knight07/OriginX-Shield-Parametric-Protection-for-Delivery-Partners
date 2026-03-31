@@ -40,6 +40,10 @@ const submitClaimValidators = [
     .optional()
     .isFloat({ min: 0 })
     .withMessage('rainfallInMillimetres must be a non-negative number.'),
+  body('currentEnvironmentalConditions.lpgShortageSeverityIndex')
+    .optional()
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('lpgShortageSeverityIndex must be a number between 0 and 100.'),
   body('partnerLocationAtDisruptionTime.latitude')
     .isFloat({ min: -90, max: 90 })
     .withMessage('partnerLocationAtDisruptionTime.latitude must be valid.'),
