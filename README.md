@@ -1,11 +1,10 @@
-**OriginX – GigShield – AI Parametric Insurance for Food Delivery Workers**
+** – GigShield – AI Parametric Insurance for Food Delivery Workers**
 
 **Team OriginX**
 
-1. SHRESTHA VERDHAN
-2. ARPIT SINGH
-3. RAMYA PATHAK
-4. ARYABRATA KUNDU
+
+1. ARPIT SINGH
+
 
 **1. Introduction**
 
