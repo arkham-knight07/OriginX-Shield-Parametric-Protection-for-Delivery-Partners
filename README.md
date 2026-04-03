@@ -121,7 +121,7 @@ AI-assisted risk hint during registration:
 - Flagged queue: `GET /api/insurance-claims/flagged`
 - Review decision: `PATCH /api/insurance-claims/:claimId/review`
 
-### 5) Automated Disruption Triggers (3-5+)
+### 5) Automated Disruption Triggers 
 
 Supported triggers:
 
