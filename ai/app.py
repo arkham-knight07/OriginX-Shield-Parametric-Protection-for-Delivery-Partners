@@ -43,6 +43,14 @@ AI_SERVICE_PUBLIC_BASE_URL = os.environ.get(
 
 # ─── Health ──────────────────────────────────────────────────────────────────
 
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({
+        'status': 'ok',
+        'service': 'GigShield AI Server',
+        'message': 'AI service is running. Use /health for health checks.',
+    })
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({
