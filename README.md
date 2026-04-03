@@ -155,7 +155,7 @@ Trigger APIs:
 - instant auto-approval path for low-risk claims
 - manual review fallback for suspicious claims
 
-## Admin Mode (Hackathon)
+## Admin Mode 
 
 Admin panel exists for judge/demo operations:
 
@@ -163,16 +163,8 @@ Admin panel exists for judge/demo operations:
 - frontend gate via `VITE_ADMIN_ACCESS_KEY`
 - supports weather checks, disruption event creation, event-level auto-claim trigger, and flagged-claim review
 
-## Demo Flow (3-5 minutes)
 
-1. Register a delivery partner.
-2. Subscribe a plan and show `pricingJustification`.
-3. Open Admin and run weather check or create a disruption event.
-4. Trigger claims for that event.
-5. Show auto-approved claim + flagged/manual-review scenario.
-6. Show partner dashboard claim history and policy coverage update.
-
-## Payment Mode for Hackathon
+## Payment Mode 
 
 Premium checkout is intentionally disabled by default.
 
