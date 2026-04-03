@@ -76,15 +76,13 @@ Projected loss ratio shown in `pricingJustification` is:
 
 Let:
 - `C` = maximum weekly coverage of selected plan
-- `e` = expected share of `C` paid out in a qualifying disruption week
-  (severity assumption, not claim probability)
+- `e` = expected share of `C` paid out in a qualifying disruption week (severity assumption, not claim probability)
 
 Then:
 
 `Projected Loss Ratio = (C × e) / Premium`
 
-Current config source: `backend/config/parametricInsuranceConstants.js`
-(`PREMIUM_MODEL_ASSUMPTIONS.EXPECTED_PAYOUT_SEVERITY_RATIO = 0.30`).
+Current config source: `backend/config/parametricInsuranceConstants.js` (`PREMIUM_MODEL_ASSUMPTIONS.EXPECTED_PAYOUT_SEVERITY_RATIO = 0.30`).
 
 Using the same example with Standard plan coverage:
 - `C = 500`, `e = 0.30`, `Premium = 64`
