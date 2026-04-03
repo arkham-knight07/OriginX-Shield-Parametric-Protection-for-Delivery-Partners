@@ -3,11 +3,15 @@
  *
  * Orchestrates the end-to-end lifecycle of an insurance claim:
  *   1. Validates that the delivery partner has an active policy
- *   2. Runs multi-layer fraud verification checks
- *   3. Determines whether to approve or flag the claim
- *   4. Initiates the payout via the payment gateway
- *   5. Updates the policy's remaining coverage balance
+ *   2. Checks for coverage exclusions
+ *   3. Calculates the compensation amount from the disruption severity
+ *   4. Runs multi-layer fraud verification checks
+ *   5. Approves or flags the claim for manual review
+ *   6. Initiates the Razorpay payout for approved claims
+ *   7. Updates the policy's remaining coverage balance
  */
+
+'use strict';
 
 const InsuranceClaim = require('../models/InsuranceClaim');
 const InsurancePolicy = require('../models/InsurancePolicy');
@@ -17,19 +21,58 @@ const mongoose = require('mongoose');
 const {
   INSURANCE_CLAIM_STATUSES,
   INSURANCE_POLICY_STATUSES,
+  DISRUPTION_EVENT_TYPES,
+  DISRUPTION_TRIGGER_THRESHOLDS,
 } = require('../config/parametricInsuranceConstants');
 const { performComprehensiveFraudVerification } = require('./fraudDetectionService');
 const {
   calculateDisruptionSeverityRatio,
   determineCompensationAmountForDisruption,
 } = require('./disruptionThresholdChecker');
-const { triggerPayoutForApprovedClaim } = require('./payoutService');
-const { executeWithRetries } = require('./retryExecutor');
+const { initiateClaimPayout } = require('./paymentService');
 
 const EXCLUSION_TAG_LABELS = {
   war_or_hostilities: 'war or hostile operations',
   pandemic_or_epidemic: 'pandemic or epidemic events',
 };
+
+function resolveSeverityInputsForDisruptionEvent(disruptionType, currentEnvironmentalConditions) {
+  const values = {
+    measuredValue: 0,
+    thresholdValue: 50,
+  };
+
+  if (disruptionType === DISRUPTION_EVENT_TYPES.HEAVY_RAINFALL) {
+    values.measuredValue = Number(currentEnvironmentalConditions.rainfallInMillimetres) || 0;
+    values.thresholdValue = DISRUPTION_TRIGGER_THRESHOLDS.RAINFALL_MILLIMETRES;
+    return values;
+  }
+
+  if (disruptionType === DISRUPTION_EVENT_TYPES.EXTREME_HEAT) {
+    values.measuredValue = Number(currentEnvironmentalConditions.temperatureInCelsius) || 0;
+    values.thresholdValue = DISRUPTION_TRIGGER_THRESHOLDS.TEMPERATURE_CELSIUS;
+    return values;
+  }
+
+  if (disruptionType === DISRUPTION_EVENT_TYPES.HAZARDOUS_AIR_QUALITY) {
+    values.measuredValue = Number(currentEnvironmentalConditions.airQualityIndex) || 0;
+    values.thresholdValue = DISRUPTION_TRIGGER_THRESHOLDS.AIR_QUALITY_INDEX;
+    return values;
+  }
+
+  if (disruptionType === DISRUPTION_EVENT_TYPES.LPG_SHORTAGE) {
+    values.measuredValue = Number(currentEnvironmentalConditions.lpgShortageSeverityIndex) || 0;
+    values.thresholdValue = DISRUPTION_TRIGGER_THRESHOLDS.LPG_SHORTAGE_SEVERITY_INDEX;
+    return values;
+  }
+
+  // Curfew/flooding are currently operational/mock triggers, so default full severity.
+  values.measuredValue = 1;
+  values.thresholdValue = 1;
+  return values;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function assertValidMongoObjectId(idValue, fieldLabel) {
   if (!mongoose.isValidObjectId(idValue)) {
@@ -37,28 +80,28 @@ function assertValidMongoObjectId(idValue, fieldLabel) {
   }
 }
 
+// ─── Internal Steps ───────────────────────────────────────────────────────────
+
 /**
- * Retrieves and validates the active insurance policy for a delivery
- * partner.  Throws if no active policy is found.
+ * Retrieves and validates the active insurance policy for a delivery partner.
+ * Throws if no active policy is found.
  *
  * @param {string} deliveryPartnerId - The MongoDB ObjectId of the partner.
  * @returns {Promise<InsurancePolicy>} The active policy document.
- * @throws {Error} If no active policy exists for the given partner.
  */
 async function fetchActiveInsurancePolicyForDeliveryPartner(deliveryPartnerId) {
   assertValidMongoObjectId(deliveryPartnerId, 'delivery partner ID');
-  const deliveryPartnerObjectId = new mongoose.Types.ObjectId(deliveryPartnerId);
-  const deliveryPartner = await DeliveryPartner.findOne({ _id: deliveryPartnerObjectId });
 
+  const deliveryPartner = await DeliveryPartner.findById(deliveryPartnerId);
   if (!deliveryPartner || !deliveryPartner.activeInsurancePolicyId) {
     throw new Error(
       `No active insurance policy found for delivery partner ID: ${deliveryPartnerId}`
     );
   }
 
-  const activeInsurancePolicy = await InsurancePolicy.findOne({
-    _id: deliveryPartner.activeInsurancePolicyId,
-  });
+  const activeInsurancePolicy = await InsurancePolicy.findById(
+    deliveryPartner.activeInsurancePolicyId
+  );
 
   if (!activeInsurancePolicy || !activeInsurancePolicy.isPolicyCurrentlyActive()) {
     throw new Error(
@@ -70,17 +113,10 @@ async function fetchActiveInsurancePolicyForDeliveryPartner(deliveryPartnerId) {
 }
 
 /**
- * Creates a new insurance claim document in the database, setting its
- * initial status to PENDING_VERIFICATION.
+ * Creates a new insurance claim document in PENDING_VERIFICATION state.
  *
- * @param {object} claimInitialisationData - Data required to create the claim.
- * @param {string} claimInitialisationData.deliveryPartnerId
- * @param {string} claimInitialisationData.associatedPolicyId
- * @param {string} claimInitialisationData.triggeringDisruptionEventId
- * @param {number} claimInitialisationData.requestedCompensationAmountInRupees
- * @param {object} claimInitialisationData.partnerLocationAtDisruptionTime
- * @param {boolean} claimInitialisationData.wasPartnerActiveOnDeliveryPlatform
- * @returns {Promise<InsuranceClaim>} The newly created claim document.
+ * @param {object} claimInitialisationData
+ * @returns {Promise<InsuranceClaim>}
  */
 async function createPendingInsuranceClaim(claimInitialisationData) {
   const newInsuranceClaim = new InsuranceClaim({
@@ -94,38 +130,50 @@ async function createPendingInsuranceClaim(claimInitialisationData) {
 }
 
 /**
- * Approves a claim and deducts the payout amount from the policy's
- * remaining coverage balance.
+ * Approves a claim, initiates the Razorpay payout, and deducts the
+ * payout amount from the policy's remaining coverage balance.
  *
- * @param {InsuranceClaim} insuranceClaim - The claim document to approve.
- * @param {InsurancePolicy} activeInsurancePolicy - The associated policy.
- * @param {number} approvedPayoutAmountInRupees - The amount to disburse.
- * @returns {Promise<InsuranceClaim>} The updated claim document.
+ * @param {InsuranceClaim}   insuranceClaim         - The claim to approve.
+ * @param {InsurancePolicy}  activeInsurancePolicy  - The associated policy.
+ * @param {number}           approvedPayoutAmountInRupees
+ * @param {object}           [beneficiaryBankDetails] - Bank details for payout.
+ * @returns {Promise<InsuranceClaim>}
  */
 async function approveClaimAndDeductFromPolicyCoverage(
   insuranceClaim,
   activeInsurancePolicy,
   approvedPayoutAmountInRupees,
-  deliveryPartnerId
+  beneficiaryBankDetails = {}
 ) {
-  const payoutResult = await executeWithRetries(
-    () => triggerPayoutForApprovedClaim({
-      claimId: insuranceClaim._id.toString(),
-      deliveryPartnerId,
-      payoutAmountInRupees: approvedPayoutAmountInRupees,
-    }),
-    {
-      maxAttempts: 3,
-      retryDelayInMilliseconds: 150,
-    }
-  );
-
   insuranceClaim.approvedPayoutAmountInRupees = approvedPayoutAmountInRupees;
-  insuranceClaim.currentClaimStatus = INSURANCE_CLAIM_STATUSES.PAYOUT_PROCESSED;
-  insuranceClaim.payoutProcessedTimestamp = new Date();
-  insuranceClaim.razorpayPayoutTransactionId = payoutResult.payoutTransactionId;
+  insuranceClaim.currentClaimStatus = INSURANCE_CLAIM_STATUSES.APPROVED_FOR_PAYOUT;
   await insuranceClaim.save();
 
+  // Initiate Razorpay payout (stub mode when keys not set).
+  try {
+    const payoutResult = await initiateClaimPayout(
+      approvedPayoutAmountInRupees,
+      insuranceClaim._id.toString(),
+      beneficiaryBankDetails
+    );
+
+    insuranceClaim.currentClaimStatus = INSURANCE_CLAIM_STATUSES.PAYOUT_PROCESSED;
+    insuranceClaim.razorpayPayoutTransactionId = payoutResult.payoutId;
+    insuranceClaim.payoutProcessedTimestamp = new Date();
+    await insuranceClaim.save();
+
+    // Update delivery partner's total compensation.
+    await DeliveryPartner.findByIdAndUpdate(insuranceClaim.deliveryPartnerId, {
+      $inc: { totalCompensationReceivedInRupees: approvedPayoutAmountInRupees },
+    });
+  } catch (payoutError) {
+    // Payout failed — keep claim as APPROVED_FOR_PAYOUT so it can be retried.
+    console.error(
+      `[ClaimProcessing] Payout failed for claim ${insuranceClaim._id}: ${payoutError.message}`
+    );
+  }
+
+  // Deduct from policy coverage.
   activeInsurancePolicy.remainingCoverageInRupees -= approvedPayoutAmountInRupees;
   activeInsurancePolicy.totalClaimsFiledThisWeek += 1;
 
@@ -141,10 +189,10 @@ async function approveClaimAndDeductFromPolicyCoverage(
  * Flags a claim for manual review when the fraud risk score exceeds
  * the automatic-approval threshold.
  *
- * @param {InsuranceClaim} insuranceClaim - The claim to escalate.
- * @param {number} fraudRiskScore - The computed fraud risk score.
- * @param {object} verificationDetails - Details from fraud verification.
- * @returns {Promise<InsuranceClaim>} The updated claim document.
+ * @param {InsuranceClaim} insuranceClaim     - The claim to escalate.
+ * @param {number}         fraudRiskScore     - The computed fraud risk score.
+ * @param {object}         verificationDetails - Details from fraud verification.
+ * @returns {Promise<InsuranceClaim>}
  */
 async function escalateClaimForManualFraudReview(
   insuranceClaim,
@@ -158,20 +206,19 @@ async function escalateClaimForManualFraudReview(
   return insuranceClaim;
 }
 
+// ─── Public API ───────────────────────────────────────────────────────────────
+
 /**
- * Processes a new insurance claim from end to end:
- *   - Validates the active policy
- *   - Computes the compensation amount
- *   - Runs fraud verification
- *   - Approves or escalates the claim accordingly
+ * Processes a new insurance claim from end to end.
  *
- * @param {object} incomingClaimRequestData - All data for the claim request.
+ * @param {object} incomingClaimRequestData
  * @param {string} incomingClaimRequestData.deliveryPartnerId
  * @param {string} incomingClaimRequestData.triggeringDisruptionEventId
  * @param {object} incomingClaimRequestData.currentEnvironmentalConditions
  * @param {object} incomingClaimRequestData.partnerLocationAtDisruptionTime
  * @param {object} incomingClaimRequestData.networkSignalCoordinates
  * @param {number} incomingClaimRequestData.minutesActiveOnDeliveryPlatform
+ * @param {object} [incomingClaimRequestData.beneficiaryBankDetails]
  * @returns {Promise<{ claim: InsuranceClaim, wasAutoApproved: boolean }>}
  */
 async function processIncomingInsuranceClaim(incomingClaimRequestData) {
@@ -182,45 +229,54 @@ async function processIncomingInsuranceClaim(incomingClaimRequestData) {
     partnerLocationAtDisruptionTime,
     networkSignalCoordinates,
     minutesActiveOnDeliveryPlatform,
+    beneficiaryBankDetails = {},
   } = incomingClaimRequestData;
 
+  // Step 1 — Validate active policy.
   const activeInsurancePolicy =
     await fetchActiveInsurancePolicyForDeliveryPartner(deliveryPartnerId);
 
+  // Step 2 — Validate disruption event exists.
   assertValidMongoObjectId(triggeringDisruptionEventId, 'disruption event ID');
-  const disruptionEventObjectId = new mongoose.Types.ObjectId(triggeringDisruptionEventId);
-  const triggeringDisruptionEvent = await DisruptionEvent.findOne({
-    _id: disruptionEventObjectId,
-  });
+  const triggeringDisruptionEvent = await DisruptionEvent.findById(
+    triggeringDisruptionEventId
+  );
   if (!triggeringDisruptionEvent) {
     throw new Error(
       `No disruption event found with ID: ${triggeringDisruptionEventId}`
     );
   }
 
+  // Step 3 — Check coverage exclusions.
   const policyExclusions = activeInsurancePolicy.coverageExclusions;
-
   if (
-    triggeringDisruptionEvent.policyExclusionTag
-    && policyExclusions.includes(triggeringDisruptionEvent.policyExclusionTag)
+    triggeringDisruptionEvent.policyExclusionTag &&
+    policyExclusions.includes(triggeringDisruptionEvent.policyExclusionTag)
   ) {
     const exclusionLabel =
-      EXCLUSION_TAG_LABELS[triggeringDisruptionEvent.policyExclusionTag]
-      || 'excluded events';
+      EXCLUSION_TAG_LABELS[triggeringDisruptionEvent.policyExclusionTag] ||
+      'excluded events';
     throw new Error(
-      `Claim cannot be processed because it relates to ${exclusionLabel}, which is excluded under this policy.`
+      `Claim cannot be processed — relates to ${exclusionLabel}, ` +
+        'which is excluded under this policy.'
     );
   }
 
+  // Step 4 — Calculate compensation amount.
+  const { measuredValue, thresholdValue } = resolveSeverityInputsForDisruptionEvent(
+    triggeringDisruptionEvent.disruptionType,
+    currentEnvironmentalConditions || {}
+  );
   const rainfallSeverityRatio = calculateDisruptionSeverityRatio(
-    currentEnvironmentalConditions.rainfallInMillimetres || 0,
-    50
+    measuredValue,
+    thresholdValue
   );
   const requestedCompensationAmountInRupees = determineCompensationAmountForDisruption(
     rainfallSeverityRatio,
     activeInsurancePolicy.remainingCoverageInRupees
   );
 
+  // Step 5 — Create claim record.
   const pendingClaim = await createPendingInsuranceClaim({
     deliveryPartnerId,
     associatedPolicyId: activeInsurancePolicy._id,
@@ -230,6 +286,7 @@ async function processIncomingInsuranceClaim(incomingClaimRequestData) {
     wasPartnerActiveOnDeliveryPlatform: minutesActiveOnDeliveryPlatform >= 30,
   });
 
+  // Step 6 — Fraud verification.
   const fraudAssessmentResult = performComprehensiveFraudVerification({
     gpsReportedCoordinates: partnerLocationAtDisruptionTime,
     networkSignalCoordinates,
@@ -246,14 +303,74 @@ async function processIncomingInsuranceClaim(incomingClaimRequestData) {
     return { claim: escalatedClaim, wasAutoApproved: false };
   }
 
+  // Step 7 — Approve and initiate payout.
   const approvedClaim = await approveClaimAndDeductFromPolicyCoverage(
     pendingClaim,
     activeInsurancePolicy,
     requestedCompensationAmountInRupees,
-    deliveryPartnerId
+    beneficiaryBankDetails
   );
 
   return { claim: approvedClaim, wasAutoApproved: true };
+}
+
+/**
+ * Manually approves or rejects a claim that was flagged for review.
+ * Used by the admin review endpoint.
+ *
+ * @param {string} claimId         - MongoDB claim document ID.
+ * @param {'approve'|'reject'} decision
+ * @param {string} [reviewerNotes]
+ * @returns {Promise<InsuranceClaim>}
+ */
+async function processManualClaimReviewDecision(claimId, decision, reviewerNotes = '') {
+  assertValidMongoObjectId(claimId, 'claim ID');
+
+  const insuranceClaim = await InsuranceClaim.findById(claimId);
+  if (!insuranceClaim) {
+    throw new Error(`No insurance claim found with ID: ${claimId}`);
+  }
+
+  if (
+    insuranceClaim.currentClaimStatus !==
+    INSURANCE_CLAIM_STATUSES.FLAGGED_FOR_MANUAL_REVIEW
+  ) {
+    throw new Error(
+      `Claim ${claimId} is not currently flagged for manual review. ` +
+        `Current status: ${insuranceClaim.currentClaimStatus}`
+    );
+  }
+
+  if (decision === 'reject') {
+    insuranceClaim.currentClaimStatus = INSURANCE_CLAIM_STATUSES.REJECTED;
+    insuranceClaim.fraudReviewNotes =
+      `REJECTED by reviewer. Notes: ${reviewerNotes}`;
+    await insuranceClaim.save();
+    return insuranceClaim;
+  }
+
+  if (decision === 'approve') {
+    const activeInsurancePolicy = await InsurancePolicy.findById(
+      insuranceClaim.associatedPolicyId
+    );
+
+    if (!activeInsurancePolicy) {
+      throw new Error('Associated policy not found for manual approval.');
+    }
+
+    const approvedClaim = await approveClaimAndDeductFromPolicyCoverage(
+      insuranceClaim,
+      activeInsurancePolicy,
+      insuranceClaim.requestedCompensationAmountInRupees
+    );
+
+    approvedClaim.fraudReviewNotes =
+      `APPROVED by reviewer. Notes: ${reviewerNotes}`;
+    await approvedClaim.save();
+    return approvedClaim;
+  }
+
+  throw new Error(`Unknown review decision: "${decision}". Use 'approve' or 'reject'.`);
 }
 
 module.exports = {
@@ -262,4 +379,5 @@ module.exports = {
   approveClaimAndDeductFromPolicyCoverage,
   escalateClaimForManualFraudReview,
   processIncomingInsuranceClaim,
+  processManualClaimReviewDecision,
 };

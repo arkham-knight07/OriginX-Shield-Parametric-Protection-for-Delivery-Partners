@@ -53,6 +53,11 @@ const disruptionEventSchema = new mongoose.Schema(
       default: null,
     },
 
+    measuredLpgShortageSeverityIndex: {
+      type: Number,
+      default: null,
+    },
+
     disruptionStartTimestamp: {
       type: Date,
       required: [true, 'Disruption start time is required'],

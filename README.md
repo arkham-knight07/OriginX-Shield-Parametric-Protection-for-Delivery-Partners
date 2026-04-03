@@ -1,535 +1,234 @@
-** – GigShield – AI Parametric Insurance for Food Delivery Workers**
+# GigShield - Hackathon Project
 
-**Team OriginX**
+AI-powered parametric insurance for food delivery workers.
 
+## Team OriginX
 
-1. ARPIT SINGH
+1. SHRESTHA VERDHAN  
+2. ARPIT SINGH  
+3. RAMYA PATHAK  
+4. ARYABRATA KUNDU
 
+## Problem
 
-**1. Introduction**
+Delivery partners lose income during disruptions like heavy rain, heatwaves, poor AQI, flooding, curfews, and fuel shortages. Traditional insurance is too manual and slow for this use case.
 
-Food delivery partners working with platforms like Swiggy and Zomato depend on daily deliveries for their income. Since their work is completely outdoor-based, it is highly affected by environmental and external conditions.
+## Solution
 
-Situations such as heavy rainfall, flooding, extreme heat, pollution, or sudden curfews can reduce their working hours and directly impact their earnings.
+GigShield is a zero-touch parametric insurance system:
 
-Currently, there is no straightforward system to help them recover this loss.
+- user selects a weekly subscription plan
+- platform monitors disruption signals
+- triggers claims automatically when thresholds are crossed
+- runs fraud checks
+- auto-approves low-risk claims, routes risky claims to admin review
 
-Our project proposes a parametric insurance platform that automatically compensates delivery workers when such disruptions occur.
+## Hackathon Showcase Checklist
 
+### 1) Registration Process
 
-**2. Problem Statement**
+- UI flow: `frontend/src/pages/Register.jsx`
+- API: `POST /api/delivery-partners/register`
+- Stores profile, city, platform, earnings band, risk category
 
-Gig workers face income instability due to external conditions that are beyond their control.
+### 2) Insurance Policy Management
 
-Common issues include:
+- Subscribe plan (payment-disabled hackathon mode): `POST /api/insurance-policies/subscribe`
+- Policy by ID: `GET /api/insurance-policies/:policyId`
+- Partner policy history: `GET /api/insurance-policies/partner/:partnerId`
+- Cancel policy: `PATCH /api/insurance-policies/:policyId/cancel`
 
-. Heavy rain stopping deliveries
+### 3) Dynamic Premium Calculation
 
-. Flooded roads making travel unsafe
+Implemented in `backend/services/weeklyPremiumCalculator.js` using:
 
-. Extreme heat reducing work hours
+- location risk multiplier
+- platform multiplier
+- earnings-band context
+- loss-ratio guardrails
 
-. High pollution affecting outdoor activity
+Subscription API returns transparent `pricingJustification`.
 
-. Local curfews or area shutdowns
+AI-assisted risk hint during registration:
 
-These disruptions can reduce earnings by 20–30%, and workers receive no compensation.
+- UI calls `POST /ai/quick-risk-assess`
+- city mapped to risk score/category
 
-Traditional insurance does not solve this problem because:
+### 4) Claims Management
 
-. It does not cover income loss
+- Submit claim: `POST /api/insurance-claims/submit`
+- Claim detail: `GET /api/insurance-claims/:claimId`
+- Partner claims list: `GET /api/insurance-claims/partner/:partnerId`
+- Flagged queue: `GET /api/insurance-claims/flagged`
+- Review decision: `PATCH /api/insurance-claims/:claimId/review`
 
-. It requires manual claims
+### 5) Automated Disruption Triggers (3-5+)
 
-. It has slow payout cycles
+Supported triggers:
 
-**3. Proposed Solution**
+- heavy_rainfall
+- extreme_heat
+- hazardous_air_quality
+- lpg_shortage
+- flooding (mock/event-driven)
+- area_curfew (mock/event-driven)
 
-GigShield is an AI-powered parametric insurance platform designed specifically for food delivery workers.
+Trigger APIs:
 
-The system works automatically:
+- Threshold preview: `POST /api/disruption-events/check-threshold`
+- Create disruption event: `POST /api/disruption-events`
+- Auto-trigger claims for event: `POST /api/disruption-events/:eventId/trigger-claims`
+- Weather monitor run-now endpoint: `POST /api/admin/trigger-weather-check`
 
-. The platform monitors real-time external conditions
+### 6) Zero-Touch Claim UX
 
-. When a disruption crosses a defined threshold, a claim is triggered automatically
+- automatic claim trigger for eligible active policies
+- automatic fraud scoring
+- instant auto-approval path for low-risk claims
+- manual review fallback for suspicious claims
 
-. The worker receives compensation instantly
+## Admin Mode (Hackathon)
 
-Workers subscribe to a weekly insurance plan, and when conditions cross predefined thresholds, they receive payouts without any manual process.
+Admin panel exists for judge/demo operations:
 
-**4. Key Innovation**
+- route: `/admin`
+- frontend gate via `VITE_ADMIN_ACCESS_KEY`
+- supports weather checks, disruption event creation, event-level auto-claim trigger, and flagged-claim review
 
-Most systems rely only on GPS to verify worker location, but GPS can be easily spoofed.
+## Demo Flow (3-5 minutes)
 
-GigShield introduces a multi-layer verification system that combines:
+1. Register a delivery partner.
+2. Subscribe a plan and show `pricingJustification`.
+3. Open Admin and run weather check or create a disruption event.
+4. Trigger claims for that event.
+5. Show auto-approved claim + flagged/manual-review scenario.
+6. Show partner dashboard claim history and policy coverage update.
 
-. Location validation from multiple sources
+## Payment Mode for Hackathon
 
-. Delivery platform activity verification
+Premium checkout is intentionally disabled by default.
 
-. AI-based anomaly detection
+- `ENABLE_PREMIUM_PAYMENT_FLOW=false`
+- users can subscribe directly via `/subscribe` and access coverage immediately
+- Razorpay endpoints remain available for future enablement
 
-. Controlled payout mechanism
+## Tech Stack
 
-This ensures that only genuine workers receive payouts, making the system reliable and fraud-resistant.
+- Frontend: React + Vite
+- Backend: Node.js + Express + Mongoose
+- AI service: Python Flask
+- Data: MongoDB
+- External data: Weather + AQI APIs
 
+## Local Setup
 
-**5. Target Persona**
+### Prerequisites
 
-Our solution focuses on food delivery workers in urban areas.
+- Node.js 18+
+- Python 3.10+
+- MongoDB (local or Atlas)
 
-Persona Income Bands Used in the Model
-
-| Persona Segment | Monthly Earnings (INR) | Typical Daily Earnings (INR) | Risk Context |
-|---|---:|---:|---|
-| Entry-level | 15,000 - 22,000 | 700 | Limited buffer against 1-2 missed days |
-| Mid-tier | 22,000 - 32,000 | 1,000 | Moderate earnings stability with periodic disruption risk |
-| High-activity | 32,000 - 45,000 | 1,400 | Higher income-at-risk per disruption window due to longer active hours |
-
-These earnings bands are now configurable in backend constants and are used to explain coverage suitability.
-
-Example Scenario
-
-A delivery partner in Chennai is working during heavy rainfall. Due to flooded roads and reduced orders, the worker loses several hours of work.
-
-GigShield detects that rainfall exceeds the defined threshold and verifies that the worker was active during that time.
-
-The system then automatically compensates the worker for the lost income.
-
-
-**6. Application Workflow**
-
- The system works as follows:
-
-1. Worker registers on the platform
-
-2. The system calculates the weekly premium based on risk
-
-3. Worker subscribes to an insurance plan
-
-4. Platform continuously monitors external conditions
-
-5. When a disruption threshold is crossed, a claim is triggered
-
-6. Multi-layer verification checks are performed
-
-7. If valid, payout is processed instantly
-
-8. If flagged, claim is sent for manual review
-
-
-**7. Weekly Premium Model**
-
-The system uses a weekly pricing model, aligned with gig worker income patterns.
-
-Example Plans
-
-| Plan | Weekly Premium | Coverage |
-|---|---:|---:|
-| Basic | ₹25 | ₹300 |
-| Standard | ₹40 | ₹500 |
-| Premium | ₹60 | ₹700 |
-
-
-Premiums are adjusted based on:
-
-1. Location risk multiplier (low to very-high risk zone)
-2. Platform-specific multiplier (Swiggy, Zomato, Dunzo, Blinkit, Other)
-3. Earnings-band context (to evaluate whether coverage is meaningful relative to weekly earnings)
-4. Loss-ratio guardrails (to avoid underpricing/overpricing)
-5. Short-term disruption pressure in operations, including fuel access stress scenarios like LPG shortages that can occur during PF war/geopolitical conflict periods and other supply-chain problems
-
-Pricing Justification Logic (now implemented in backend):
-
-- Weekly earnings estimate = average daily earnings x 6 working days
-- Suggested coverage benchmark = 50% of weekly earnings estimate
-- Projected loss ratio = expected weekly payout / weekly premium
-- Target loss ratio = 0.65 (with sustainable guardrails 0.40 to 0.80)
-
-The policy subscription response now includes a `pricingJustification` object so premium and coverage decisions are transparent.
-
-**8. Parametric Triggers**
-
-The system uses measurable conditions to trigger payouts.
-
-Example Conditions: 
-
-Event	          |        Trigger
-
-Heavy Rain	    |   Rainfall > 50 mm
-
-Extreme Heat	  |   Temperature > 42°C
-
-High Pollution	|    AQI > 300
-
-LPG Shortage  |    LPG Shortage Severity Index > 70
-
-When these conditions are met, compensation is automatically initiated.
-
-The LPG shortage trigger is intended for measurable city/zone-level fuel scarcity events (for example, supply disruption during PF war-linked shocks or other logistics bottlenecks) that reduce delivery partners' earning ability.
-
-**9. Fraud Prevention Strategy**
-
-Instead of relying only on GPS, GigShield uses a multi-layer fraud prevention approach:
-
-. Device validation to detect spoofing or suspicious apps
-
-. Multi-source location verification (GPS + network signals)
-
-. Delivery platform activity check (active orders or recent work)
-
-. AI-based anomaly detection for unusual claim patterns
-
-. Controlled payout system with partial escrow
-
-This approach significantly reduces the chances of fraudulent claims and ensures system reliability.
-
-### Platform Dependency Handling
-
-While delivery platform APIs (Swiggy/Zomato) improve verification accuracy, the system is designed to remain functional even without them.  
-
-In cases where API access is unavailable or delayed, fallback validation using behavioural signals such as movement patterns, recent activity, and location consistency is used to ensure continuity.
-
-**10. Platform Choice**
-
-We are developing a web-based platform for this project.
-
-Reason:
-
-. Faster to develop within the hackathon timeline
-
-. Easy to test and demonstrate
-
-. Accessible on any device without installation
-
-A mobile application can be considered for future development.
-
-
-**11. AI / ML Integration**
-
-AI is used in two main areas of the system to make it both adaptive and reliable.
-
-**Risk Assessment**
-
-The system analyzes:
-
-. Historical weather data
-
-. Location-based environmental risks
-
-. Frequency of past disruptions in a specific area
-
-Based on these factors, it assigns a risk score to each location.
-This risk score is then used to dynamically adjust the weekly premium, ensuring that pricing reflects real-world conditions.
-
-**Fraud Detection**
-
-To prevent misuse of the system, AI is used to identify suspicious or abnormal behavior.
-
-The system checks:
-
-. Consistency of location data across multiple sources
-
-. Claim frequency patterns of individual users
-
-. Mismatch between actual disruption events and user activity
-
-If unusual patterns are detected, the claim is either flagged for review or temporarily held, reducing the chances of fraudulent payouts.
-
-### Dynamic Risk Control
-
-The system includes a circuit breaker mechanism to prevent coordinated fraud.  
-
-Instead of using fixed thresholds, the limits are dynamically adjusted based on zone size, number of active workers, and historical activity patterns to avoid blocking genuine claims during large-scale events such as floods.
-
-**12. Technology Stack**
-
-
-**Frontend**
-React.js
-
-**Backend**
-Node.js with Express
-
-**Database**
-MongoDB
-
-**External APIs**
-Weather API (rainfall, temperature)
-Pollution API (AQI)
-
-**AI / ML**
-Python for risk analysis and anomaly detection
-
-**Payments**
-Razorpay (sandbox mode)
-
-**13. System Architecture**
-![PHOTO-2026-03-20-21-27-40](https://github.com/user-attachments/assets/9107d99c-d7ef-4b40-bc98-940dc99d9e12)
-
-
-This architecture shows how different components of the system interact, including user applications, backend services, AI modules, external APIs, and payment systems.
-
-**14. Workflow Diagram**
-![PHOTO-2026-03-20-21-37-15](https://github.com/user-attachments/assets/97824b2b-dddb-4aa1-9db9-ee80a4e600ad)
-
-
-**14. Development Plan**
-
-**Phase 1 – Ideation**
-
-. Research and problem understanding
-
-. Persona selection
-
-. System design
-
-. AI planning
-
-. Repository setup
-
-**Phase 2 – Core Features**
-
-. User registration
-
-. Policy creation
-
-. Premium calculation
-
-. Disruption detection
-
-. Claim system
-
-**Phase 3 – Enhancement**
-
-. Advanced fraud detection
-
-. Payment integration
-
-. Dashboard for users and admin
-
-. Predictive insights
-
-**15. Additional Notes**
-
-The system focuses only on income loss, not health or vehicle damage
-
-The claim process is fully automated
-
-The solution is scalable to other gig worker categories in the future
-
-**16. Privacy Considerations**
-
-The system is designed with user privacy in mind.  
-
-Only necessary data is collected for verification, and all sensitive information is encrypted and processed with user consent. The system avoids storing unnecessary personal data.
-
-**17. Demo Video**
-
-https://youtu.be/qJf-wKjICPI
-
-**18. Regulatory Considerations**
-
-GigShield is designed as a prototype system. In real-world deployment, it would operate under IRDAI regulations by partnering with licensed insurance providers.
-
-Current compliance-oriented improvements in the prototype:
-
-- Explicit regulatory note exposed in policy metadata endpoint
-- Explicit exclusions declared and wired into claim processing
-- Loss-ratio tracking at policy enrollment to support pricing audits
-- Transparent pricing justification returned at subscription time
-
-Standard exclusions now declared in model/config:
-
-- War or hostile operations (`war_or_hostilities`)
-- Pandemic or epidemic events (`pandemic_or_epidemic`)
-
-These exclusions are represented as policy metadata and can block claim processing when a disruption event is tagged with an exclusion.
-
-**19. How to Modify the Model Later (Change-Friendly Setup)**
-
-To tune the model without deep code changes, update:
-
-- `backend/config/parametricInsuranceConstants.js`
-  - `DELIVERY_PARTNER_PERSONA_EARNINGS_BANDS`
-  - `PLATFORM_RISK_PREMIUM_MULTIPLIERS`
-  - `PREMIUM_MODEL_ASSUMPTIONS`
-  - `LOSS_RATIO_GUARDRAILS`
-  - `COVERAGE_EXCLUSIONS`
-
-Key API outputs for verification:
-
-- `POST /api/insurance-policies/subscribe` now returns `pricingJustification`
-- `GET /api/insurance-policies/metadata/pricing-model` returns exclusions, loss-ratio guardrails, and IRDAI deployment note
-
-## 20. Frontend Implementation (React + Tailwind CSS)
-
-The frontend is now implemented in React with Tailwind CSS and includes all primary user flows:
-
-- Delivery partner registration
-- Plan subscription
-- Claim submission
-- Policy/claim tracking dashboard
-- Validation + loading + error feedback UX
-
-Frontend location:
-
-- `frontend/src/App.jsx` (main app + flow forms)
-- `frontend/src/index.css` (Tailwind entry)
-- `frontend/tailwind.config.js`
-- `frontend/postcss.config.js`
-
-Run frontend locally:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Build and test frontend:
-
-```bash
-npm run test
-npm run build
-```
-
-## 21. Backend Hardening Updates
-
-The backend now includes production-hardening foundations:
-
-1. Authentication/authorization scaffolding
-   - `POST /api/auth/token` issues JWT token
-   - Optional route protection via `ENFORCE_AUTH=true`
-   - Middleware:
-     - `backend/middleware/authMiddleware.js`
-     - `backend/middleware/optionalAuth.js`
-
-2. Request validation middleware
-   - `backend/middleware/validationMiddleware.js`
-   - Validators in `backend/validators/requestValidators.js`
-   - Applied to delivery partner, policy, and claim routes
-
-3. Payout wiring abstraction
-   - `backend/services/payoutService.js`
-   - Supports `PAYOUT_MODE=mock|disabled` and claim payout hook integration
-
-4. Observability/logging and resilience
-   - `helmet` security headers
-   - `morgan` request logging to structured logger
-   - `backend/utils/logger.js`
-   - Retry helper `backend/services/retryExecutor.js`
-
-## 22. Quality, Tests, and CI/CD
-
-### Backend tests
+### 1) Backend
 
 ```bash
 cd backend
 npm install
-npm test
+cp .env.example .env
+npm run dev
 ```
 
-Includes new tests for:
+### 2) AI service
 
-- auth enforcement middleware
-- request validation behavior
-- retry execution behavior
+```bash
+cd ai
+pip install -r requirements.txt
+python app.py
+```
 
-### Frontend tests
+### 3) Frontend
 
 ```bash
 cd frontend
 npm install
-npm run test
+cp .env.example .env
+npm run dev
 ```
 
-### CI workflow
+## Environment Variables
 
-A CI workflow is added at:
+### Backend (`backend/.env`)
 
-- `.github/workflows/ci.yml`
+- `PORT`
+- `NODE_ENV`
+- `MONGODB_URI`
+- `JWT_SECRET_KEY`
+- `ENFORCE_AUTH`
+- `AUTH_DEMO_USERNAME`
+- `AUTH_DEMO_PASSWORD_HASH` or `AUTH_DEMO_PASSWORD`
+- `WEATHER_API_KEY`
+- `POLLUTION_API_KEY`
+- `WEATHER_API_BASE_URL`
+- `POLLUTION_API_BASE_URL`
+- `PAYOUT_MODE`
+- `ENABLE_PREMIUM_PAYMENT_FLOW`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_ACCOUNT_NUMBER`
 
-It runs:
-- backend install + tests
-- frontend install + tests + build
+### Frontend (`frontend/.env`)
 
-## 23. API Reference (Current)
+- `VITE_API_BASE_URL`
+- `VITE_AI_BASE_URL`
+- `VITE_RAZORPAY_KEY_ID`
+- `VITE_ADMIN_ACCESS_KEY`
 
-### Auth
-- `POST /api/auth/token`
+## API Quick Reference
 
 ### Delivery Partner
+
 - `POST /api/delivery-partners/register`
 - `GET /api/delivery-partners/:partnerId`
 
 ### Insurance Policy
+
 - `POST /api/insurance-policies/subscribe`
-- `GET /api/insurance-policies/metadata/pricing-model`
+- `GET /api/insurance-policies/partner/:partnerId`
 - `GET /api/insurance-policies/:policyId`
+- `PATCH /api/insurance-policies/:policyId/cancel`
 
-### Insurance Claim
+### Insurance Claims
+
 - `POST /api/insurance-claims/submit`
+- `GET /api/insurance-claims/partner/:partnerId`
 - `GET /api/insurance-claims/:claimId`
+- `GET /api/insurance-claims/flagged`
+- `PATCH /api/insurance-claims/:claimId/review`
 
-Tiny claim submission payload example:
+### Disruption Events
 
-```json
-{
-  "deliveryPartnerId": "65f0c2a1b8d4ef0012345678",
-  "triggeringDisruptionEventId": "65f0c2a1b8d4ef0012345679",
-  "currentEnvironmentalConditions": {
-    "rainfallInMillimetres": 62,
-    "lpgShortageSeverityIndex": 78
-  },
-  "partnerLocationAtDisruptionTime": { "latitude": 13.0827, "longitude": 80.2707 },
-  "networkSignalCoordinates": { "latitude": 13.083, "longitude": 80.271 },
-  "minutesActiveOnDeliveryPlatform": 45
-}
+- `POST /api/disruption-events`
+- `GET /api/disruption-events`
+- `POST /api/disruption-events/check-threshold`
+- `POST /api/disruption-events/:eventId/trigger-claims`
+
+### Admin Utility
+
+- `POST /api/admin/trigger-weather-check`
+
+## Tests
+
+```bash
+cd backend
+npm test
 ```
 
-Minimum payload variant (essential fields only):
-
-```json
-{
-  "deliveryPartnerId": "65f0c2a1b8d4ef0012345678",
-  "triggeringDisruptionEventId": "65f0c2a1b8d4ef0012345679",
-  "partnerLocationAtDisruptionTime": { "latitude": 13.0827, "longitude": 80.2707 },
-  "networkSignalCoordinates": { "latitude": 13.083, "longitude": 80.271 },
-  "minutesActiveOnDeliveryPlatform": 45
-}
+```bash
+cd frontend
+npm run build
 ```
 
-### Health
-- `GET /api/health`
+## Demo Assets
 
-## 24. Database Models (MongoDB/Mongoose)
-
-Defined in:
-
-- `backend/models/DeliveryPartner.js`
-- `backend/models/InsurancePolicy.js`
-- `backend/models/InsuranceClaim.js`
-- `backend/models/DisruptionEvent.js`
-
-These models cover partner onboarding, weekly policy lifecycle, claim lifecycle, and disruption triggers.
-
-## 25. Deployment and Secrets Guide
-
-Minimum production env vars:
-
-- `MONGODB_URI`
-- `PORT`
-- `JWT_SECRET_KEY`
-- `ENFORCE_AUTH` (`true`/`false`)
-- `AUTH_DEMO_USERNAME` (for prototype auth endpoint)
-- `AUTH_DEMO_PASSWORD_HASH` (preferred) or `AUTH_DEMO_PASSWORD`
-- `PAYOUT_MODE` (`mock` for prototype, replace with real gateway integration mode later)
-- `WEATHER_API_KEY`
-- `POLLUTION_API_KEY`
-
-Security notes:
-
-- Do not hardcode secrets in code
-- Use GitHub repository secrets for CI/CD
-- Use environment-level secret stores in deployment platform
+- Demo video: https://youtu.be/qJf-wKjICPI
+- Architecture diagram: https://github.com/user-attachments/assets/9107d99c-d7ef-4b40-bc98-940dc99d9e12
+- Workflow diagram: https://github.com/user-attachments/assets/97824b2b-dddb-4aa1-9db9-ee80a4e600ad

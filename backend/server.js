@@ -1,69 +1,96 @@
 /**
  * Main Express application entry point for the GigShield backend.
  *
- * Initialises middleware, registers API route handlers, and starts
- * listening for incoming HTTP requests on the configured port.
+ * Initialises middleware, registers API route handlers, starts
+ * weather monitoring, and begins listening for HTTP requests.
  */
+
+'use strict';
+
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
 
 const { connectToDatabase } = require('./config/databaseConfig');
+const { startWeatherMonitoring, runWeatherMonitoringCycle } = require('./services/weatherMonitoringService');
 const deliveryPartnerRouter = require('./routes/deliveryPartnerRoutes');
 const insurancePolicyRouter = require('./routes/insurancePolicyRoutes');
-const insuranceClaimRouter = require('./routes/insuranceClaimRoutes');
+const insuranceClaimRouter  = require('./routes/insuranceClaimRoutes');
+const disruptionEventRouter = require('./routes/disruptionEventRoutes');
 const authRouter = require('./routes/authRoutes');
-const { requestLoggerStream } = require('./utils/logger');
-const { errorHandlerMiddleware } = require('./middleware/errorHandler');
 
 const HTTP_SERVER_PORT = process.env.PORT || 5000;
 
 const expressApplication = express();
 
 expressApplication.use(cors());
-expressApplication.use(helmet());
 expressApplication.use(express.json());
-expressApplication.use(morgan('combined', { stream: requestLoggerStream }));
 
-expressApplication.use('/api/delivery-partners', deliveryPartnerRouter);
+// ─── API Routes ───────────────────────────────────────────────────────────────
+
+expressApplication.use('/api/delivery-partners',  deliveryPartnerRouter);
 expressApplication.use('/api/insurance-policies', insurancePolicyRouter);
-expressApplication.use('/api/insurance-claims', insuranceClaimRouter);
-expressApplication.use('/api/auth', authRouter);
+expressApplication.use('/api/insurance-claims',   insuranceClaimRouter);
+expressApplication.use('/api/disruption-events',  disruptionEventRouter);
+expressApplication.use('/api/auth',               authRouter);
+
+// ─── Admin Utility Endpoints ──────────────────────────────────────────────────
 
 /**
- * Health check endpoint used by monitoring tools and load balancers
- * to verify that the server is running and accepting connections.
+ * POST /api/admin/trigger-weather-check
+ * Manually triggers one weather monitoring cycle across all cities.
+ * Useful for demos and testing without waiting 30 minutes.
  */
+expressApplication.post('/api/admin/trigger-weather-check', async (req, res) => {
+  try {
+    const result = await runWeatherMonitoringCycle();
+    return res.status(200).json({ success: true, ...result });
+  } catch (err) {
+    return res.status(500).json({ success: false, errorDetails: err.message });
+  }
+});
+
+// ─── Health Check ─────────────────────────────────────────────────────────────
+
 expressApplication.get('/api/health', (request, response) => {
   response.status(200).json({
-    status: 'healthy',
-    serviceName: 'GigShield Parametric Insurance API',
+    status:          'healthy',
+    serviceName:     'GigShield Parametric Insurance API',
     serverTimestamp: new Date().toISOString(),
+    environment:     process.env.NODE_ENV || 'development',
+    paymentMode:     require('./services/paymentService').IS_PAYMENT_STUB_MODE ? 'stub' : 'live',
+    weatherMonitor:  process.env.WEATHER_API_KEY ? 'active' : 'disabled (no API key)',
   });
 });
 
-expressApplication.use(errorHandlerMiddleware);
+// ─── 404 Catch-all ────────────────────────────────────────────────────────────
 
-/**
- * Starts the HTTP server after establishing a database connection.
- *
- * @returns {Promise<void>}
- */
+expressApplication.use((request, response) => {
+  response.status(404).json({
+    success: false,
+    message: `Route not found: ${request.method} ${request.originalUrl}`,
+  });
+});
+
+// ─── Server Bootstrap ─────────────────────────────────────────────────────────
+
 async function startHttpServer() {
   await connectToDatabase();
 
   expressApplication.listen(HTTP_SERVER_PORT, () => {
-    console.log(
-      `GigShield API server is running on port ${HTTP_SERVER_PORT}`
-    );
+    console.log(`✅  GigShield API server running on port ${HTTP_SERVER_PORT}`);
+    console.log(`    Environment : ${process.env.NODE_ENV || 'development'}`);
+    console.log(`    Payment mode: ${require('./services/paymentService').IS_PAYMENT_STUB_MODE ? 'STUB' : 'LIVE'}`);
   });
+
+  // Start weather polling after DB is connected.
+  startWeatherMonitoring();
 }
 
 if (require.main === module) {
-  startHttpServer().catch((serverStartupError) => {
-    console.error('Failed to start the HTTP server:', serverStartupError.message);
+  startHttpServer().catch((err) => {
+    console.error('Failed to start the HTTP server:', err.message);
     process.exit(1);
   });
 }

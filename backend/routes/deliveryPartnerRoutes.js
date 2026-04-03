@@ -2,33 +2,40 @@
  * Express router for delivery partner registration and profile management.
  *
  * Endpoints:
- *   POST /api/delivery-partners/register  - Register a new delivery partner
- *   GET  /api/delivery-partners/:partnerId - Fetch a partner's profile
+ *   POST  /api/delivery-partners/register       - Register a new delivery partner
+ *   GET   /api/delivery-partners/               - List all delivery partners (paginated)
+ *   GET   /api/delivery-partners/:partnerId     - Fetch a partner's full profile
+ *   PATCH /api/delivery-partners/:partnerId/verify - Mark a partner as verified
+ *   PATCH /api/delivery-partners/:partnerId     - Update partner details
  */
+
+'use strict';
 
 const express = require('express');
 const DeliveryPartner = require('../models/DeliveryPartner');
+const { validateIncomingRequest } = require('../middleware/validationMiddleware');
 const {
   deliveryPartnerRegistrationValidators,
   deliveryPartnerIdParamValidators,
 } = require('../validators/requestValidators');
-const { validateIncomingRequest } = require('../middleware/validationMiddleware');
-const { requireAuthIfEnabled } = require('../middleware/optionalAuth');
-const { apiRateLimiter } = require('../middleware/rateLimitMiddleware');
 
 const deliveryPartnerRouter = express.Router();
 
+// ─── POST /api/delivery-partners/register ────────────────────────────────────
+
 /**
- * POST /api/delivery-partners/register
- *
  * Registers a new delivery partner account.
- * The request body must include name, email, phone, city, coordinates,
- * and at least one delivery platform.
+ *
+ * Required body fields:
+ *   fullName, emailAddress, mobilePhoneNumber, primaryDeliveryCity,
+ *   primaryDeliveryZoneCoordinates { latitude, longitude },
+ *   deliveryPlatformNames (array)
+ *
+ * Optional:
+ *   averageMonthlyEarningsInRupees, locationRiskCategory
  */
 deliveryPartnerRouter.post(
   '/register',
-  apiRateLimiter,
-  requireAuthIfEnabled,
   deliveryPartnerRegistrationValidators,
   validateIncomingRequest,
   async (request, response) => {
@@ -41,13 +48,26 @@ deliveryPartnerRouter.post(
       primaryDeliveryZoneCoordinates,
       deliveryPlatformNames,
       averageMonthlyEarningsInRupees,
+      locationRiskCategory,
     } = request.body;
 
-    const existingPartnerWithSameEmail = await DeliveryPartner.findOne({ emailAddress });
+    const existingPartnerWithSameEmail = await DeliveryPartner.findOne({
+      emailAddress,
+    });
     if (existingPartnerWithSameEmail) {
       return response.status(409).json({
         success: false,
         message: 'A delivery partner account with this email address already exists.',
+      });
+    }
+
+    const existingPartnerWithSamePhone = await DeliveryPartner.findOne({
+      mobilePhoneNumber,
+    });
+    if (existingPartnerWithSamePhone) {
+      return response.status(409).json({
+        success: false,
+        message: 'A delivery partner account with this phone number already exists.',
       });
     }
 
@@ -58,7 +78,8 @@ deliveryPartnerRouter.post(
       primaryDeliveryCity,
       primaryDeliveryZoneCoordinates,
       deliveryPlatformNames,
-      averageMonthlyEarningsInRupees,
+      averageMonthlyEarningsInRupees: averageMonthlyEarningsInRupees || null,
+      locationRiskCategory: locationRiskCategory || 'moderate_risk_zone',
     });
 
     const savedDeliveryPartner = await newDeliveryPartner.save();
@@ -71,6 +92,8 @@ deliveryPartnerRouter.post(
         fullName: savedDeliveryPartner.fullName,
         emailAddress: savedDeliveryPartner.emailAddress,
         primaryDeliveryCity: savedDeliveryPartner.primaryDeliveryCity,
+        deliveryPlatformNames: savedDeliveryPartner.deliveryPlatformNames,
+        locationRiskCategory: savedDeliveryPartner.locationRiskCategory,
         accountRegistrationDate: savedDeliveryPartner.accountRegistrationDate,
       },
     });
@@ -81,27 +104,79 @@ deliveryPartnerRouter.post(
       errorDetails: registrationError.message,
     });
   }
-}
+  }
 );
 
+// ─── GET /api/delivery-partners/ ─────────────────────────────────────────────
+
 /**
- * GET /api/delivery-partners/:partnerId
- *
- * Retrieves the profile of a registered delivery partner by their ID.
+ * Returns a paginated list of all registered delivery partners.
+ * Supports optional filtering by city (?city=Chennai) and platform (?platform=swiggy).
+ */
+deliveryPartnerRouter.get('/', async (request, response) => {
+  try {
+    const { city, platform, verified, page = 1, limit = 20 } = request.query;
+
+    const filterQuery = {};
+    if (city) {
+      filterQuery.primaryDeliveryCity = { $regex: new RegExp(city, 'i') };
+    }
+    if (platform) {
+      filterQuery.deliveryPlatformNames = platform.toLowerCase();
+    }
+    if (verified !== undefined) {
+      filterQuery.isAccountVerified = verified === 'true';
+    }
+
+    const pageNumber = Math.max(1, parseInt(page, 10));
+    const pageSize = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skipCount = (pageNumber - 1) * pageSize;
+
+    const [deliveryPartners, totalCount] = await Promise.all([
+      DeliveryPartner.find(filterQuery)
+        .sort({ accountRegistrationDate: -1 })
+        .skip(skipCount)
+        .limit(pageSize)
+        .select('-__v'),
+      DeliveryPartner.countDocuments(filterQuery),
+    ]);
+
+    return response.status(200).json({
+      success: true,
+      totalCount,
+      page: pageNumber,
+      limit: pageSize,
+      deliveryPartners,
+    });
+  } catch (listFetchError) {
+    return response.status(500).json({
+      success: false,
+      message: 'Failed to retrieve delivery partners.',
+      errorDetails: listFetchError.message,
+    });
+  }
+});
+
+// ─── GET /api/delivery-partners/:partnerId ────────────────────────────────────
+
+/**
+ * Retrieves the full profile of a registered delivery partner by their ID.
+ * Populates the active insurance policy reference.
  */
 deliveryPartnerRouter.get(
   '/:partnerId',
-  apiRateLimiter,
-  requireAuthIfEnabled,
   deliveryPartnerIdParamValidators,
   validateIncomingRequest,
   async (request, response) => {
   try {
     const { partnerId } = request.params;
 
-    const deliveryPartner = await DeliveryPartner.findById(partnerId).select(
-      '-__v'
-    );
+    const deliveryPartner = await DeliveryPartner.findById(partnerId)
+      .populate(
+        'activeInsurancePolicyId',
+        'selectedPlanTier weeklyPremiumChargedInRupees maximumWeeklyCoverageInRupees remainingCoverageInRupees currentPolicyStatus policyStartDate policyEndDate'
+      )
+      .select('-__v');
 
     if (!deliveryPartner) {
       return response.status(404).json({
@@ -121,7 +196,119 @@ deliveryPartnerRouter.get(
       errorDetails: profileFetchError.message,
     });
   }
-}
+  }
+);
+
+// ─── PATCH /api/delivery-partners/:partnerId/verify ──────────────────────────
+
+/**
+ * Marks a delivery partner's account as verified.
+ * In a production system this would follow KYC document validation.
+ */
+deliveryPartnerRouter.patch(
+  '/:partnerId/verify',
+  deliveryPartnerIdParamValidators,
+  validateIncomingRequest,
+  async (request, response) => {
+  try {
+    const { partnerId } = request.params;
+
+    const deliveryPartner = await DeliveryPartner.findByIdAndUpdate(
+      partnerId,
+      { isAccountVerified: true },
+      { new: true, runValidators: true }
+    ).select('-__v');
+
+    if (!deliveryPartner) {
+      return response.status(404).json({
+        success: false,
+        message: `No delivery partner found with ID: ${partnerId}`,
+      });
+    }
+
+    return response.status(200).json({
+      success: true,
+      message: 'Delivery partner account verified successfully.',
+      deliveryPartner: {
+        partnerId: deliveryPartner._id,
+        fullName: deliveryPartner.fullName,
+        isAccountVerified: deliveryPartner.isAccountVerified,
+      },
+    });
+  } catch (verifyError) {
+    return response.status(500).json({
+      success: false,
+      message: 'Failed to verify delivery partner account.',
+      errorDetails: verifyError.message,
+    });
+  }
+  }
+);
+
+// ─── PATCH /api/delivery-partners/:partnerId ──────────────────────────────────
+
+/**
+ * Updates editable fields on a delivery partner profile.
+ * Allowed fields: primaryDeliveryCity, primaryDeliveryZoneCoordinates,
+ *   deliveryPlatformNames, averageMonthlyEarningsInRupees, locationRiskCategory.
+ */
+deliveryPartnerRouter.patch(
+  '/:partnerId',
+  deliveryPartnerIdParamValidators,
+  validateIncomingRequest,
+  async (request, response) => {
+  try {
+    const { partnerId } = request.params;
+
+    const ALLOWED_UPDATE_FIELDS = [
+      'primaryDeliveryCity',
+      'primaryDeliveryZoneCoordinates',
+      'deliveryPlatformNames',
+      'averageMonthlyEarningsInRupees',
+      'locationRiskCategory',
+    ];
+
+    const updatePayload = {};
+    for (const field of ALLOWED_UPDATE_FIELDS) {
+      if (request.body[field] !== undefined) {
+        updatePayload[field] = request.body[field];
+      }
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+      return response.status(400).json({
+        success: false,
+        message: 'No valid fields provided for update.',
+        allowedFields: ALLOWED_UPDATE_FIELDS,
+      });
+    }
+
+    const updatedDeliveryPartner = await DeliveryPartner.findByIdAndUpdate(
+      partnerId,
+      updatePayload,
+      { new: true, runValidators: true }
+    ).select('-__v');
+
+    if (!updatedDeliveryPartner) {
+      return response.status(404).json({
+        success: false,
+        message: `No delivery partner found with ID: ${partnerId}`,
+      });
+    }
+
+    return response.status(200).json({
+      success: true,
+      message: 'Delivery partner profile updated successfully.',
+      deliveryPartner: updatedDeliveryPartner,
+    });
+  } catch (updateError) {
+    return response.status(500).json({
+      success: false,
+      message: 'Failed to update delivery partner profile.',
+      errorDetails: updateError.message,
+    });
+  }
+  }
 );
 
 module.exports = deliveryPartnerRouter;

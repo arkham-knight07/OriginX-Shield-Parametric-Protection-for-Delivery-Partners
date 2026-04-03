@@ -1,0 +1,539 @@
+{
+  "info": {
+    "_postman_id": "gigshield-originx-collection",
+    "name": "GigShield — Parametric Insurance API",
+    "description": "Complete API collection for the GigShield parametric insurance platform. Import this into Postman and set the `base_url` variable to `http://localhost:5000`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "partner_id",
+      "value": "",
+      "type": "string",
+      "description": "Set after registering a partner"
+    },
+    {
+      "key": "policy_id",
+      "value": "",
+      "type": "string",
+      "description": "Set after subscribing to a policy"
+    },
+    {
+      "key": "disruption_event_id",
+      "value": "",
+      "type": "string",
+      "description": "Set after creating a disruption event"
+    },
+    {
+      "key": "claim_id",
+      "value": "",
+      "type": "string",
+      "description": "Set after submitting a claim"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delivery Partners",
+      "item": [
+        {
+          "name": "Register Delivery Partner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.success && json.deliveryPartner) {",
+                  "  pm.collectionVariables.set('partner_id', json.deliveryPartner.partnerId);",
+                  "  console.log('partner_id set to:', json.deliveryPartner.partnerId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Raju Kumar\",\n  \"emailAddress\": \"raju.kumar@example.com\",\n  \"mobilePhoneNumber\": \"9876543210\",\n  \"primaryDeliveryCity\": \"Chennai\",\n  \"primaryDeliveryZoneCoordinates\": {\n    \"latitude\": 13.0827,\n    \"longitude\": 80.2707\n  },\n  \"deliveryPlatformNames\": [\"swiggy\", \"zomato\"],\n  \"averageMonthlyEarningsInRupees\": 22000,\n  \"locationRiskCategory\": \"high_risk_zone\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/delivery-partners/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "delivery-partners", "register"]
+            }
+          }
+        },
+        {
+          "name": "List All Delivery Partners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/delivery-partners?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "delivery-partners"],
+              "query": [
+                { "key": "city", "value": "", "disabled": true },
+                { "key": "platform", "value": "", "disabled": true },
+                { "key": "verified", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Delivery Partner Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/delivery-partners/{{partner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "delivery-partners", "{{partner_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Verify Delivery Partner Account",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/delivery-partners/{{partner_id}}/verify",
+              "host": ["{{base_url}}"],
+              "path": ["api", "delivery-partners", "{{partner_id}}", "verify"]
+            }
+          }
+        },
+        {
+          "name": "Update Delivery Partner Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"averageMonthlyEarningsInRupees\": 28000,\n  \"locationRiskCategory\": \"very_high_risk_zone\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/delivery-partners/{{partner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "delivery-partners", "{{partner_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Insurance Policies",
+      "item": [
+        {
+          "name": "Get Pricing Model Metadata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/insurance-policies/metadata/pricing-model",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-policies", "metadata", "pricing-model"]
+            }
+          }
+        },
+        {
+          "name": "Subscribe to Policy (Direct — no payment)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.success && json.insurancePolicy) {",
+                  "  pm.collectionVariables.set('policy_id', json.insurancePolicy.policyId);",
+                  "  console.log('policy_id set to:', json.insurancePolicy.policyId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryPartnerId\": \"{{partner_id}}\",\n  \"selectedPlanTier\": \"standard\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/insurance-policies/subscribe",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-policies", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "Create Razorpay Payment Order (for premium)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.success && json.policyId) {",
+                  "  pm.collectionVariables.set('policy_id', json.policyId);",
+                  "  console.log('policy_id (pending):', json.policyId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryPartnerId\": \"{{partner_id}}\",\n  \"selectedPlanTier\": \"premium\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/insurance-policies/create-payment-order",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-policies", "create-payment-order"]
+            }
+          }
+        },
+        {
+          "name": "Verify Razorpay Payment & Activate Policy",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyId\": \"{{policy_id}}\",\n  \"razorpayOrderId\": \"order_STUB_REPLACE_ME\",\n  \"razorpayPaymentId\": \"pay_STUB_REPLACE_ME\",\n  \"razorpaySignature\": \"signature_STUB_REPLACE_ME\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/insurance-policies/verify-payment",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-policies", "verify-payment"]
+            }
+          }
+        },
+        {
+          "name": "Get Policy Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/insurance-policies/{{policy_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-policies", "{{policy_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get All Policies for Partner",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/insurance-policies/partner/{{partner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-policies", "partner", "{{partner_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Policy",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/insurance-policies/{{policy_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-policies", "{{policy_id}}", "cancel"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disruption Events",
+      "item": [
+        {
+          "name": "Check Threshold (no DB write)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rainfallInMillimetres\": 72,\n  \"temperatureInCelsius\": 38,\n  \"airQualityIndex\": 180\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/disruption-events/check-threshold",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disruption-events", "check-threshold"]
+            }
+          }
+        },
+        {
+          "name": "Create Disruption Event (Heavy Rain)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.success && json.disruptionEvent) {",
+                  "  pm.collectionVariables.set('disruption_event_id', json.disruptionEvent._id);",
+                  "  console.log('disruption_event_id set to:', json.disruptionEvent._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disruptionType\": \"heavy_rainfall\",\n  \"affectedCityName\": \"Chennai\",\n  \"affectedZoneCentreCoordinates\": {\n    \"latitude\": 13.0827,\n    \"longitude\": 80.2707\n  },\n  \"affectedRadiusInKilometres\": 10,\n  \"measuredRainfallInMillimetres\": 85,\n  \"measuredTemperatureInCelsius\": 30,\n  \"measuredAirQualityIndex\": 120,\n  \"disruptionStartTimestamp\": \"2026-04-03T10:00:00.000Z\",\n  \"weatherApiDataSourceName\": \"openweathermap\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/disruption-events",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disruption-events"]
+            }
+          }
+        },
+        {
+          "name": "Create Disruption Event (Extreme Heat)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disruptionType\": \"extreme_heat\",\n  \"affectedCityName\": \"Delhi\",\n  \"affectedZoneCentreCoordinates\": {\n    \"latitude\": 28.6139,\n    \"longitude\": 77.2090\n  },\n  \"affectedRadiusInKilometres\": 15,\n  \"measuredTemperatureInCelsius\": 47,\n  \"disruptionStartTimestamp\": \"2026-04-03T12:00:00.000Z\",\n  \"weatherApiDataSourceName\": \"openweathermap\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/disruption-events",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disruption-events"]
+            }
+          }
+        },
+        {
+          "name": "Create Disruption Event (Hazardous AQI)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disruptionType\": \"hazardous_air_quality\",\n  \"affectedCityName\": \"Mumbai\",\n  \"affectedZoneCentreCoordinates\": {\n    \"latitude\": 19.0760,\n    \"longitude\": 72.8777\n  },\n  \"affectedRadiusInKilometres\": 20,\n  \"measuredAirQualityIndex\": 355,\n  \"disruptionStartTimestamp\": \"2026-04-03T08:00:00.000Z\",\n  \"weatherApiDataSourceName\": \"openweathermap\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/disruption-events",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disruption-events"]
+            }
+          }
+        },
+        {
+          "name": "List All Disruption Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/disruption-events?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disruption-events"],
+              "query": [
+                { "key": "city", "value": "", "disabled": true },
+                { "key": "type", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Disruption Event by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/disruption-events/{{disruption_event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disruption-events", "{{disruption_event_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Trigger Claims for All Partners in Zone",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"networkSignalCoordinates\": {\n    \"latitude\": 13.0827,\n    \"longitude\": 80.2707\n  },\n  \"minutesActiveOnDeliveryPlatform\": 90,\n  \"currentEnvironmentalConditions\": {\n    \"rainfallInMillimetres\": 85,\n    \"temperatureInCelsius\": 30,\n    \"airQualityIndex\": 120\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/disruption-events/{{disruption_event_id}}/trigger-claims",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disruption-events", "{{disruption_event_id}}", "trigger-claims"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Insurance Claims",
+      "item": [
+        {
+          "name": "Submit Claim (Manual)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.success && json.claim) {",
+                  "  pm.collectionVariables.set('claim_id', json.claim.claimId);",
+                  "  console.log('claim_id set to:', json.claim.claimId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryPartnerId\": \"{{partner_id}}\",\n  \"triggeringDisruptionEventId\": \"{{disruption_event_id}}\",\n  \"currentEnvironmentalConditions\": {\n    \"rainfallInMillimetres\": 85,\n    \"temperatureInCelsius\": 30,\n    \"airQualityIndex\": 120\n  },\n  \"partnerLocationAtDisruptionTime\": {\n    \"latitude\": 13.0827,\n    \"longitude\": 80.2707\n  },\n  \"networkSignalCoordinates\": {\n    \"latitude\": 13.0830,\n    \"longitude\": 80.2710\n  },\n  \"minutesActiveOnDeliveryPlatform\": 90,\n  \"beneficiaryBankDetails\": {\n    \"accountHolderName\": \"Raju Kumar\",\n    \"accountNumber\": \"1234567890\",\n    \"ifscCode\": \"SBIN0001234\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/insurance-claims/submit",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-claims", "submit"]
+            }
+          }
+        },
+        {
+          "name": "Submit Claim (Likely to be Flagged — bad location)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryPartnerId\": \"{{partner_id}}\",\n  \"triggeringDisruptionEventId\": \"{{disruption_event_id}}\",\n  \"currentEnvironmentalConditions\": {\n    \"rainfallInMillimetres\": 85,\n    \"temperatureInCelsius\": 30,\n    \"airQualityIndex\": 120\n  },\n  \"partnerLocationAtDisruptionTime\": {\n    \"latitude\": 13.0827,\n    \"longitude\": 80.2707\n  },\n  \"networkSignalCoordinates\": {\n    \"latitude\": 19.0760,\n    \"longitude\": 72.8777\n  },\n  \"minutesActiveOnDeliveryPlatform\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/insurance-claims/submit",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-claims", "submit"]
+            }
+          }
+        },
+        {
+          "name": "Get All Flagged Claims (Admin Queue)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/insurance-claims/flagged",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-claims", "flagged"]
+            }
+          }
+        },
+        {
+          "name": "Get Claims for Partner",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/insurance-claims/partner/{{partner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-claims", "partner", "{{partner_id}}"],
+              "query": [
+                { "key": "status", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Claim Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/insurance-claims/{{claim_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-claims", "{{claim_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Admin Review — Approve Flagged Claim",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"reviewerNotes\": \"Verified with partner directly. GPS anomaly was a network glitch.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/insurance-claims/{{claim_id}}/review",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-claims", "{{claim_id}}", "review"]
+            }
+          }
+        },
+        {
+          "name": "Admin Review — Reject Flagged Claim",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"reject\",\n  \"reviewerNotes\": \"Location data clearly spoofed. Partner was not in the affected zone.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/insurance-claims/{{claim_id}}/review",
+              "host": ["{{base_url}}"],
+              "path": ["api", "insurance-claims", "{{claim_id}}", "review"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
