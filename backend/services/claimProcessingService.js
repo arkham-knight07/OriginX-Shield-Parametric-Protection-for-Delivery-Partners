@@ -36,6 +36,9 @@ const EXCLUSION_TAG_LABELS = {
   war_or_hostilities: 'war or hostile operations',
   pandemic_or_epidemic: 'pandemic or epidemic events',
 };
+// Conservative fallback window for anomaly checks when event timestamps are incomplete.
+// Keeps AI behavior deterministic instead of deriving near-zero durations from missing values.
+const DEFAULT_DISRUPTION_DURATION_IN_MINUTES = 120;
 
 function resolveSeverityInputsForDisruptionEvent(disruptionType, currentEnvironmentalConditions) {
   const values = {
@@ -342,6 +345,24 @@ async function processIncomingInsuranceClaim(incomingClaimRequestData) {
     );
   }
 
+  const disruptionStartTimestamp = triggeringDisruptionEvent.disruptionStartTimestamp
+    ? new Date(triggeringDisruptionEvent.disruptionStartTimestamp)
+    : null;
+  const disruptionEndTimestamp = triggeringDisruptionEvent.disruptionEndTimestamp
+    ? new Date(triggeringDisruptionEvent.disruptionEndTimestamp)
+    : null;
+  const hasBothTimestamps =
+    disruptionStartTimestamp instanceof Date
+    && !Number.isNaN(disruptionStartTimestamp.getTime())
+    && disruptionEndTimestamp instanceof Date
+    && !Number.isNaN(disruptionEndTimestamp.getTime());
+  const resolvedDisruptionDurationInMinutes = hasBothTimestamps
+    ? Math.max(
+      1,
+      Math.round((disruptionEndTimestamp.getTime() - disruptionStartTimestamp.getTime()) / 60000)
+    )
+    : DEFAULT_DISRUPTION_DURATION_IN_MINUTES;
+
   // Step 5 — Create claim record.
   const pendingClaim = await createPendingInsuranceClaim({
     deliveryPartnerId,
@@ -354,11 +375,15 @@ async function processIncomingInsuranceClaim(incomingClaimRequestData) {
   });
 
   // Step 6 — Fraud verification.
-  const fraudAssessmentResult = performComprehensiveFraudVerification({
+  const fraudAssessmentResult = await performComprehensiveFraudVerification({
+    claimId: pendingClaim._id.toString(),
+    deliveryPartnerId,
     gpsReportedCoordinates: partnerLocationAtDisruptionTime,
     networkSignalCoordinates,
     minutesActiveOnDeliveryPlatform,
     numberOfClaimsFiledThisWeek: activeInsurancePolicy.totalClaimsFiledThisWeek,
+    disruptionEpicentreCoordinates: triggeringDisruptionEvent.affectedZoneCentreCoordinates,
+    disruptionDurationInMinutes: resolvedDisruptionDurationInMinutes,
   });
 
   if (fraudAssessmentResult.requiresManualReview) {

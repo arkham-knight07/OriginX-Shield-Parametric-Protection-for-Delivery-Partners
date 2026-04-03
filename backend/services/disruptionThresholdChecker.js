@@ -9,6 +9,7 @@
 const {
   DISRUPTION_TRIGGER_THRESHOLDS,
   DISRUPTION_EVENT_TYPES,
+  PREMIUM_MODEL_ASSUMPTIONS,
 } = require('../config/parametricInsuranceConstants');
 
 /**
@@ -143,10 +144,22 @@ function determineCompensationAmountForDisruption(
   disruptionSeverityRatio,
   remainingPolicyCoverageInRupees
 ) {
-  const recommendedCompensationInRupees = Math.round(
-    disruptionSeverityRatio * remainingPolicyCoverageInRupees
+  const clampedSeverityRatio = Math.max(0, Math.min(1, Number(disruptionSeverityRatio) || 0));
+
+  if (clampedSeverityRatio <= 0 || remainingPolicyCoverageInRupees <= 0) {
+    return 0;
+  }
+
+  const boundedPayoutRatio = Math.max(
+    PREMIUM_MODEL_ASSUMPTIONS.MINIMUM_DISRUPTION_PAYOUT_RATIO,
+    Math.min(PREMIUM_MODEL_ASSUMPTIONS.MAXIMUM_DISRUPTION_PAYOUT_RATIO, clampedSeverityRatio)
   );
-  return Math.min(recommendedCompensationInRupees, remainingPolicyCoverageInRupees);
+
+  const boundedCompensationInRupees = Math.round(
+    boundedPayoutRatio * remainingPolicyCoverageInRupees
+  );
+
+  return Math.min(boundedCompensationInRupees, remainingPolicyCoverageInRupees);
 }
 
 module.exports = {
