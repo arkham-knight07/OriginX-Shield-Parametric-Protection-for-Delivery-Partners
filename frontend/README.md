@@ -1,6 +1,6 @@
-# GigShield Frontend (React + Vite)
+﻿# RakshaRide Frontend (React + Vite)
 
-This frontend implements core user flows for the GigShield prototype:
+This frontend implements core user flows for the RakshaRide prototype:
 
 1. Delivery partner registration
 2. Policy plan subscription
@@ -35,10 +35,11 @@ npm run preview
 ## API Configuration
 
 - In development, Vite proxy routes:
-  - `/api` → `http://localhost:5000`
-  - `/ai` → `http://localhost:5001`
+  - `/api` â†’ `http://localhost:5000`
+  - `/ai` â†’ `http://localhost:5001`
 - For deployed environments, set values in `frontend/.env`:
   - `VITE_API_BASE_URL`
   - `VITE_AI_BASE_URL`
   - `VITE_RAZORPAY_KEY_ID`
   - `VITE_ADMIN_ACCESS_KEY`
+

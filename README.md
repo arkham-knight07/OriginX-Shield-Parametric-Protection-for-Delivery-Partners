@@ -1,4 +1,4 @@
-# Kavach (formerly GigShield) — Real-Time Income Protection for Gig Workers
+﻿# RakshaRide - Real-Time Income Protection for Gig Workers
 
 AI-powered parametric insurance for food delivery workers.
 
@@ -10,9 +10,9 @@ AI-powered parametric insurance for food delivery workers.
 4. ARYABRATA KUNDU
 
 ## Overview
-Kavach is a **Guidewire-aligned, IRDAI-compliant micro-insurance platform** designed for gig workers, enabling automatic compensation when external disruptions materially impact their earning ability.
+RakshaRide is a **Guidewire-aligned, IRDAI-compliant micro-insurance platform** designed for gig workers, enabling automatic compensation when external disruptions materially impact their earning ability.
 
-Unlike traditional parametric insurance systems that rely solely on environmental triggers, Kavach combines:
+Unlike traditional parametric insurance systems that rely solely on environmental triggers, RakshaRide combines:
 
 - Environmental signals (weather, AQI)
 
@@ -49,7 +49,7 @@ Traditional insurance fails because it:
 
 ## Solution
 
-Kavach introduces a micro-duration (weekly) income protection system.
+RakshaRide introduces a micro-duration (weekly) income protection system.
 
 How It Works:
 
@@ -128,7 +128,7 @@ Let:
 
 Then the contextual weekly premium is:
 
-`Premium = round(B × L × P × S × (1 + k))`
+`Premium = round(B Ã— L Ã— P Ã— S Ã— (1 + k))`
 
 From current config values:
 - `k = 0.10`
@@ -136,7 +136,7 @@ From current config values:
 
 Example (Standard plan in monsoon):
 - `B = 40`, `L = 1.2`, `P = 1.05`, `S = 1.15`, `k = 0.10`
-- `Premium = round(40 × 1.2 × 1.05 × 1.15 × 1.10)`
+- `Premium = round(40 Ã— 1.2 Ã— 1.05 Ã— 1.15 Ã— 1.10)`
 - `Premium = round(63.756) = 64 `
 
 Projected loss ratio shown in `pricingJustification` is:
@@ -147,13 +147,13 @@ Let:
 
 Then:
 
-`Projected Loss Ratio = (C × e) / Premium`
+`Projected Loss Ratio = (C Ã— e) / Premium`
 
 Current config source: `backend/config/parametricInsuranceConstants.js` (`PREMIUM_MODEL_ASSUMPTIONS.EXPECTED_PAYOUT_SEVERITY_RATIO = 0.15`).
 
 Using the same example with Standard plan coverage:
 - `C = 500`, `e = 0.15`, `Premium = 64`
-- `Projected Loss Ratio = (500 × 0.15) / 64 = 75 / 64 = 1.17` (rounded to 1.2 decimals)
+- `Projected Loss Ratio = (500 Ã— 0.15) / 64 = 75 / 64 = 1.17` (rounded to 1.2 decimals)
 
 Note: the resulting loss ratio of `1.2` in this worked example is included only
 to show the calculation path. In the current model, it is classified as
@@ -188,7 +188,7 @@ Trigger threshold snapshot:
 | Event | Trigger |
 |---|---|
 | Heavy Rain | Rainfall > 50 mm |
-| Extreme Heat | Temperature > 42°C |
+| Extreme Heat | Temperature > 42Â°C |
 | Hazardous Air Quality | AQI > 300 |
 | LPG Shortage | Severity Index > 70 |
 
@@ -225,7 +225,7 @@ Premium checkout is intentionally disabled by default.
 
 ## Guidewire-Centric System Design
 
-Kavach leverages Guidewire as a coordinated insurance execution engine:
+RakshaRide leverages Guidewire as a coordinated insurance execution engine:
 
 ### PolicyCenter
 
@@ -248,17 +248,17 @@ Kavach leverages Guidewire as a coordinated insurance execution engine:
 
 ### Data Flow
 
-1. User registers → KYC validation
-2. Policy created → PolicyCenter
-3. Premium calculated → rating engine
-4. Payment processed → BillingCenter
-5. Event detected → ClaimCenter FNOL
-6. Fraud scoring → ML service
-7. Payout executed → payment gateway
+1. User registers â†’ KYC validation
+2. Policy created â†’ PolicyCenter
+3. Premium calculated â†’ rating engine
+4. Payment processed â†’ BillingCenter
+5. Event detected â†’ ClaimCenter FNOL
+6. Fraud scoring â†’ ML service
+7. Payout executed â†’ payment gateway
 
 ### IRDAI Compliance Enforcement
 
-Kavach enforces compliance at the system level, ensuring auditability and regulatory alignment.
+RakshaRide enforces compliance at the system level, ensuring auditability and regulatory alignment.
 
 | Regulation Area | System Enforcement | Implementation |
 |---|---|---|
@@ -388,3 +388,4 @@ npm run build
 - Demo video:https://youtu.be/fXFalfp_7NA?si=Xr1wwxWuCuQ--4ba
 - Architecture diagram: https://github.com/user-attachments/assets/9107d99c-d7ef-4b40-bc98-940dc99d9e12
 - Workflow diagram: https://github.com/user-attachments/assets/97824b2b-dddb-4aa1-9db9-ee80a4e600ad
+

@@ -1,5 +1,5 @@
-"""
-Anomaly detection module for the GigShield fraud prevention system.
+﻿"""
+Anomaly detection module for the RakshaRide fraud prevention system.
 
 Analyses claim submissions to identify patterns that deviate significantly
 from established norms, flagging potentially fraudulent activity before
@@ -8,7 +8,7 @@ a payout is approved.
 Detection checks performed:
   1. Claim frequency spike: delivery partner submitting too many claims in a
      short period compared to the population average.
-  2. Location–disruption mismatch: the partner's reported location at claim
+  2. Locationâ€“disruption mismatch: the partner's reported location at claim
      time is far from the epicentre of the recorded disruption event.
   3. Activity signal mismatch: delivery platform activity is inconsistent
      with the disruption window reported in the claim.
@@ -281,3 +281,4 @@ def run_anomaly_detection_checks_for_claim(
         should_flag_for_manual_review=should_flag_for_manual_review,
         anomaly_detection_notes=detection_notes,
     )
+

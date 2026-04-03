@@ -1,5 +1,5 @@
-/**
- * GigShield API client.
+﻿/**
+ * RakshaRide API client.
  * Wraps all fetch calls to the Node.js backend (/api) and Python AI server (/ai).
  */
 
@@ -16,14 +16,14 @@ async function request(url, options = {}) {
   return data;
 }
 
-// ─── Delivery Partners ────────────────────────────────────────────────────────
+// â”€â”€â”€ Delivery Partners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const registerPartner     = (body)           => request(`${BASE}/delivery-partners/register`, { method: 'POST', body: JSON.stringify(body) });
 export const getPartner          = (id)             => request(`${BASE}/delivery-partners/${id}`);
 export const listPartners        = (params = {})    => request(`${BASE}/delivery-partners?${new URLSearchParams(params)}`);
 export const verifyPartner       = (id)             => request(`${BASE}/delivery-partners/${id}/verify`, { method: 'PATCH' });
 export const updatePartner       = (id, body)       => request(`${BASE}/delivery-partners/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 
-// ─── Insurance Policies ───────────────────────────────────────────────────────
+// â”€â”€â”€ Insurance Policies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const subscribePolicy          = (body)      => request(`${BASE}/insurance-policies/subscribe`,             { method: 'POST', body: JSON.stringify(body) });
 export const createPaymentOrder       = (body)      => request(`${BASE}/insurance-policies/create-payment-order`,  { method: 'POST', body: JSON.stringify(body) });
 export const verifyPayment            = (body)      => request(`${BASE}/insurance-policies/verify-payment`,        { method: 'POST', body: JSON.stringify(body) });
@@ -32,25 +32,26 @@ export const getPolicy                = (id)        => request(`${BASE}/insuranc
 export const getPartnerPolicies       = (partnerId) => request(`${BASE}/insurance-policies/partner/${partnerId}`);
 export const cancelPolicy             = (id)        => request(`${BASE}/insurance-policies/${id}/cancel`, { method: 'PATCH' });
 
-// ─── Insurance Claims ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Insurance Claims â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const submitClaim          = (body)          => request(`${BASE}/insurance-claims/submit`,                 { method: 'POST', body: JSON.stringify(body) });
 export const getClaim             = (id)            => request(`${BASE}/insurance-claims/${id}`);
 export const getPartnerClaims     = (partnerId, p)  => request(`${BASE}/insurance-claims/partner/${partnerId}?${new URLSearchParams(p || {})}`);
 export const getFlaggedClaims     = (p)             => request(`${BASE}/insurance-claims/flagged?${new URLSearchParams(p || {})}`);
 export const reviewClaim          = (id, body)      => request(`${BASE}/insurance-claims/${id}/review`,           { method: 'PATCH', body: JSON.stringify(body) });
 
-// ─── Disruption Events ────────────────────────────────────────────────────────
+// â”€â”€â”€ Disruption Events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const createDisruptionEvent      = (body)    => request(`${BASE}/disruption-events`,                            { method: 'POST', body: JSON.stringify(body) });
 export const listDisruptionEvents       = (p)       => request(`${BASE}/disruption-events?${new URLSearchParams(p || {})}`);
 export const getDisruptionEvent         = (id)      => request(`${BASE}/disruption-events/${id}`);
 export const checkThreshold             = (body)    => request(`${BASE}/disruption-events/check-threshold`,            { method: 'POST', body: JSON.stringify(body) });
 export const triggerClaimsForEvent      = (id, body)=> request(`${BASE}/disruption-events/${id}/trigger-claims`,       { method: 'POST', body: JSON.stringify(body) });
 
-// ─── Admin ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const triggerWeatherCheck = () => request(`${BASE}/admin/trigger-weather-check`, { method: 'POST' });
 export const healthCheck         = () => request(`${BASE}/health`);
 
-// ─── Python AI ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Python AI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const aiQuickRiskAssess   = (body) => request(`${AI}/quick-risk-assess`, { method: 'POST', body: JSON.stringify(body) });
 export const aiAssessRisk        = (body) => request(`${AI}/assess-risk`,       { method: 'POST', body: JSON.stringify(body) });
 export const aiDetectAnomaly     = (body) => request(`${AI}/detect-anomaly`,    { method: 'POST', body: JSON.stringify(body) });
+

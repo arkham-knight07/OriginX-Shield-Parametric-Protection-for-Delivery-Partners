@@ -1,7 +1,7 @@
-{
-  "name": "gigshield-backend",
+﻿{
+  "name": "raksharide-backend",
   "version": "1.0.0",
-  "description": "GigShield parametric insurance backend API for delivery partners",
+  "description": "RakshaRide parametric insurance backend API for delivery partners",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -29,3 +29,4 @@
     "node": ">=18.0.0"
   }
 }
+

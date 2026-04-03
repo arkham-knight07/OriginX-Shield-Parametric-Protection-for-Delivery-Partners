@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   getFlaggedClaims, reviewClaim, listDisruptionEvents,
   triggerWeatherCheck, createDisruptionEvent, listPartners, triggerClaimsForEvent,
-} from '../api/gigshieldApi';
+} from '../api/rakshaRideApi';
 import StatusBadge from '../components/StatusBadge';
 
 export default function Admin() {
-  const ADMIN_SESSION_STORAGE_KEY = 'gigshield_admin_unlocked';
+  const ADMIN_SESSION_STORAGE_KEY = 'raksharide_admin_unlocked';
   const [flagged,   setFlagged]   = useState([]);
   const [events,    setEvents]    = useState([]);
   const [partners,  setPartners]  = useState([]);
@@ -63,7 +63,7 @@ export default function Admin() {
     setReviewing(r => ({ ...r, [claimId]: true }));
     try {
       await reviewClaim(claimId, { decision, reviewerNotes: note[claimId] || '' });
-      showToast(`Claim ${decision === 'approve' ? 'approved ✅' : 'rejected ❌'}`);
+      showToast(`Claim ${decision === 'approve' ? 'approved âœ…' : 'rejected âŒ'}`);
       setFlagged(f => f.filter(c => c._id !== claimId));
     } catch (e) { showToast('Review failed: ' + e.message); }
     finally { setReviewing(r => ({ ...r, [claimId]: false })); }
@@ -74,7 +74,7 @@ export default function Admin() {
     try {
       const r = await triggerWeatherCheck();
       setWeatherResult(r);
-      showToast(`Weather check done — ${r.totalEventsCreated} new event(s) created`);
+      showToast(`Weather check done â€” ${r.totalEventsCreated} new event(s) created`);
       loadData();
     } catch (e) { showToast('Weather check failed: ' + e.message); }
     finally { setWeatherLoading(false); }
@@ -87,7 +87,7 @@ export default function Admin() {
         ...newEvent,
         disruptionStartTimestamp: new Date().toISOString(),
       });
-      showToast('Disruption event created ✅');
+      showToast('Disruption event created âœ…');
       loadData();
     } catch (e) { showToast('Failed: ' + e.message); }
     finally { setCreating(false); }
@@ -122,16 +122,16 @@ export default function Admin() {
   };
 
   const stats = [
-    { icon: '🚩', cls: 'stat-icon-indigo', label: 'Flagged Claims',   value: flagged.length },
-    { icon: '⚡', cls: 'stat-icon-amber',  label: 'Active Events',    value: events.filter(e => !e.hasAutomaticClaimTriggerBeenFired).length },
-    { icon: '👥', cls: 'stat-icon-sky',    label: 'Total Partners',   value: partners.length },
-    { icon: '✅', cls: 'stat-icon-emerald',label: 'Verified Partners', value: partners.filter(p => p.isAccountVerified).length },
+    { icon: 'ðŸš©', cls: 'stat-icon-indigo', label: 'Flagged Claims',   value: flagged.length },
+    { icon: 'âš¡', cls: 'stat-icon-amber',  label: 'Active Events',    value: events.filter(e => !e.hasAutomaticClaimTriggerBeenFired).length },
+    { icon: 'ðŸ‘¥', cls: 'stat-icon-sky',    label: 'Total Partners',   value: partners.length },
+    { icon: 'âœ…', cls: 'stat-icon-emerald',label: 'Verified Partners', value: partners.filter(p => p.isAccountVerified).length },
   ];
 
   const TABS = [
     { id: 'claims',  label: `Flagged Claims (${flagged.length})` },
     { id: 'events',  label: `Disruption Events (${events.length})` },
-    { id: 'weather', label: '⛅ Weather Monitor' },
+    { id: 'weather', label: 'â›… Weather Monitor' },
   ];
 
   return (
@@ -154,7 +154,7 @@ export default function Admin() {
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button className="btn btn-secondary btn-sm" onClick={loadData} disabled={loading}>
-                {loading ? '…' : '↻ Refresh'}
+                {loading ? 'â€¦' : 'â†» Refresh'}
               </button>
               <button className="btn btn-danger btn-sm" onClick={handleAdminLogout}>
                 Logout Admin
@@ -170,7 +170,7 @@ export default function Admin() {
           {stats.map(s => (
             <div className="card card-sm stat-card" key={s.label}>
               <div className={`stat-icon ${s.cls}`}>{s.icon}</div>
-              <div className="stat-value">{loading ? '—' : s.value}</div>
+              <div className="stat-value">{loading ? 'â€”' : s.value}</div>
               <div className="stat-label">{s.label}</div>
             </div>
           ))}
@@ -191,12 +191,12 @@ export default function Admin() {
 
         {loading && <div className="loading-full"><div className="spinner" /></div>}
 
-        {/* ── Flagged Claims ── */}
+        {/* â”€â”€ Flagged Claims â”€â”€ */}
         {!loading && tab === 'claims' && (
           flagged.length === 0
             ? (
               <div className="empty-state">
-                <div className="empty-icon">🎉</div>
+                <div className="empty-icon">ðŸŽ‰</div>
                 <div className="empty-title">No flagged claims</div>
                 <div className="empty-sub">All claims have been reviewed or auto-approved.</div>
               </div>
@@ -214,10 +214,10 @@ export default function Admin() {
                             {claim.deliveryPartnerId?.fullName || 'Unknown Partner'}
                           </div>
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            {claim.deliveryPartnerId?.emailAddress} · {claim.deliveryPartnerId?.primaryDeliveryCity}
+                            {claim.deliveryPartnerId?.emailAddress} Â· {claim.deliveryPartnerId?.primaryDeliveryCity}
                           </div>
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                            {claim.triggeringDisruptionEventId?.disruptionType?.replace(/_/g, ' ')} — {claim.triggeringDisruptionEventId?.affectedCityName} ·{' '}
+                            {claim.triggeringDisruptionEventId?.disruptionType?.replace(/_/g, ' ')} â€” {claim.triggeringDisruptionEventId?.affectedCityName} Â·{' '}
                             {new Date(claim.claimSubmissionTimestamp).toLocaleString('en-IN')}
                           </div>
                         </div>
@@ -230,7 +230,7 @@ export default function Admin() {
                           </div>
                           <div>
                             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '2px' }}>Requested</div>
-                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>₹{claim.requestedCompensationAmountInRupees}</div>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>â‚¹{claim.requestedCompensationAmountInRupees}</div>
                           </div>
                         </div>
                       </div>
@@ -248,14 +248,14 @@ export default function Admin() {
                       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                         <div className="form-group" style={{ flex: 1, minWidth: 200 }}>
                           <label className="form-label">Reviewer Notes</label>
-                          <input className="form-input" placeholder="Optional notes…"
+                          <input className="form-input" placeholder="Optional notesâ€¦"
                             value={note[claim._id] || ''} onChange={e => setNote(n => ({ ...n, [claim._id]: e.target.value }))} />
                         </div>
                         <button className="btn btn-success" onClick={() => handleReview(claim._id, 'approve')} disabled={reviewing[claim._id]}>
-                          {reviewing[claim._id] ? '…' : '✓ Approve'}
+                          {reviewing[claim._id] ? 'â€¦' : 'âœ“ Approve'}
                         </button>
                         <button className="btn btn-danger" onClick={() => handleReview(claim._id, 'reject')} disabled={reviewing[claim._id]}>
-                          {reviewing[claim._id] ? '…' : '✕ Reject'}
+                          {reviewing[claim._id] ? 'â€¦' : 'âœ• Reject'}
                         </button>
                       </div>
                     </div>
@@ -265,7 +265,7 @@ export default function Admin() {
             )
         )}
 
-        {/* ── Disruption Events ── */}
+        {/* â”€â”€ Disruption Events â”€â”€ */}
         {!loading && tab === 'events' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Create event */}
@@ -292,7 +292,7 @@ export default function Admin() {
                   <input className="form-input" type="number" value={newEvent.measuredRainfallInMillimetres} onChange={e => setEvt('measuredRainfallInMillimetres', e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Temp (°C)</label>
+                  <label className="form-label">Temp (Â°C)</label>
                   <input className="form-input" type="number" value={newEvent.measuredTemperatureInCelsius} onChange={e => setEvt('measuredTemperatureInCelsius', e.target.value)} />
                 </div>
                 <div className="form-group">
@@ -309,13 +309,13 @@ export default function Admin() {
                 </div>
               </div>
               <button className="btn btn-primary" onClick={handleCreateEvent} disabled={creating}>
-                {creating ? <><span className="spinner spinner-sm" /> Creating…</> : '+ Create Event'}
+                {creating ? <><span className="spinner spinner-sm" /> Creatingâ€¦</> : '+ Create Event'}
               </button>
             </div>
 
             {/* Events list */}
             {events.length === 0
-              ? <div className="empty-state"><div className="empty-icon">⛅</div><div className="empty-title">No disruption events</div></div>
+              ? <div className="empty-state"><div className="empty-icon">â›…</div><div className="empty-title">No disruption events</div></div>
               : (
                 <div className="table-wrap">
                   <table>
@@ -336,10 +336,10 @@ export default function Admin() {
                           <td><StatusBadge status={ev.disruptionType} /></td>
                           <td>{ev.affectedCityName}</td>
                           <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            {ev.measuredRainfallInMillimetres != null && `🌧 ${ev.measuredRainfallInMillimetres}mm `}
-                            {ev.measuredTemperatureInCelsius != null && `🌡 ${ev.measuredTemperatureInCelsius}°C `}
-                            {ev.measuredAirQualityIndex != null && `💨 AQI ${ev.measuredAirQualityIndex} `}
-                            {ev.measuredLpgShortageSeverityIndex != null && `⛽ LPG ${ev.measuredLpgShortageSeverityIndex}`}
+                            {ev.measuredRainfallInMillimetres != null && `ðŸŒ§ ${ev.measuredRainfallInMillimetres}mm `}
+                            {ev.measuredTemperatureInCelsius != null && `ðŸŒ¡ ${ev.measuredTemperatureInCelsius}Â°C `}
+                            {ev.measuredAirQualityIndex != null && `ðŸ’¨ AQI ${ev.measuredAirQualityIndex} `}
+                            {ev.measuredLpgShortageSeverityIndex != null && `â›½ LPG ${ev.measuredLpgShortageSeverityIndex}`}
                           </td>
                           <td>{ev.numberOfAffectedDeliveryPartners || 0}</td>
                           <td>
@@ -374,14 +374,14 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── Weather Monitor ── */}
+        {/* â”€â”€ Weather Monitor â”€â”€ */}
         {!loading && tab === 'weather' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: 640 }}>
             <div className="card">
               <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Auto-Weather Monitoring</div>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.25rem', lineHeight: 1.7 }}>
-                GigShield automatically polls OpenWeatherMap every <strong>30 minutes</strong> for
-                8 Indian cities. When rainfall exceeds 50 mm, temperature exceeds 42°C, or AQI
+                RakshaRide automatically polls OpenWeatherMap every <strong>30 minutes</strong> for
+                8 Indian cities. When rainfall exceeds 50 mm, temperature exceeds 42Â°C, or AQI
                 exceeds 300, a disruption event is created automatically. Additional mock triggers
                 (LPG shortage, curfew, flooding) can be created from the Events tab.
               </p>
@@ -391,14 +391,14 @@ export default function Admin() {
                 ))}
               </div>
               <button className="btn btn-primary" onClick={handleWeatherCheck} disabled={weatherLoading}>
-                {weatherLoading ? <><span className="spinner spinner-sm" /> Checking all cities…</> : '⛅ Run Weather Check Now'}
+                {weatherLoading ? <><span className="spinner spinner-sm" /> Checking all citiesâ€¦</> : 'â›… Run Weather Check Now'}
               </button>
             </div>
 
             {weatherResult && (
               <div className="card animate-slide-up">
                 <div style={{ fontWeight: 700, marginBottom: '1rem' }}>
-                  Last Check — {new Date(weatherResult.checkedAt).toLocaleTimeString('en-IN')}
+                  Last Check â€” {new Date(weatherResult.checkedAt).toLocaleTimeString('en-IN')}
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                   <div style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'rgba(245,158,11,0.06)', borderRadius: 10 }}>
@@ -417,8 +417,8 @@ export default function Admin() {
                       {r.error
                         ? <span style={{ fontSize: '0.78rem', color: 'var(--red)' }}>Error</span>
                         : r.eventsCreated?.length > 0
-                          ? <span style={{ fontSize: '0.78rem', color: 'var(--red)', fontWeight: 700 }}>⚠️ {r.eventsCreated.join(', ')}</span>
-                          : <span style={{ fontSize: '0.78rem', color: 'var(--emerald)' }}>✓ Normal</span>
+                          ? <span style={{ fontSize: '0.78rem', color: 'var(--red)', fontWeight: 700 }}>âš ï¸ {r.eventsCreated.join(', ')}</span>
+                          : <span style={{ fontSize: '0.78rem', color: 'var(--emerald)' }}>âœ“ Normal</span>
                       }
                     </div>
                   ))}
@@ -431,3 +431,4 @@ export default function Admin() {
     </div>
   );
 }
+

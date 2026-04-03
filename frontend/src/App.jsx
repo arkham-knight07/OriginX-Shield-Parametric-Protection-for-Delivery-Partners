@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Landing from './pages/Landing';
@@ -6,7 +6,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 
-const ADMIN_SESSION_STORAGE_KEY = 'gigshield_admin_unlocked';
+const ADMIN_SESSION_STORAGE_KEY = 'raksharide_admin_unlocked';
 const ADMIN_ACCESS_KEY = (import.meta.env.VITE_ADMIN_ACCESS_KEY || '').trim();
 
 function AdminProtectedRoute() {
@@ -89,3 +89,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

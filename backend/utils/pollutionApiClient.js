@@ -1,4 +1,4 @@
-/**
+﻿/**
  * HTTP client utility for the external Air Quality / Pollution API.
  *
  * Fetches the current Air Quality Index (AQI) for a specified city.
@@ -89,7 +89,7 @@ async function fetchCurrentAirQualityIndexForLocation(
   const latestPollutionReading = rawPollutionApiResponse.list[0];
 
   // OpenWeatherMap AQI scale: 1=Good, 2=Fair, 3=Moderate, 4=Poor, 5=VeryPoor
-  // Map to approximate numeric AQI (0-500 scale used in GigShield)
+  // Map to approximate numeric AQI (0-500 scale used in RakshaRide)
   const openWeatherAqiToNumericMapping = {
     1: 50,
     2: 100,
@@ -117,3 +117,4 @@ async function fetchCurrentAirQualityIndexForLocation(
 module.exports = {
   fetchCurrentAirQualityIndexForLocation,
 };
+

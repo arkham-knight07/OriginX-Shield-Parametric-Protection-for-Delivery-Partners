@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerPartner, subscribePolicy, aiQuickRiskAssess } from '../api/gigshieldApi';
+import { registerPartner, subscribePolicy, aiQuickRiskAssess } from '../api/rakshaRideApi';
 
 const PLATFORMS = ['swiggy', 'zomato', 'dunzo', 'blinkit', 'other'];
 const CITIES = ['Chennai', 'Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Kolkata', 'Pune', 'Ahmedabad'];
@@ -15,11 +15,11 @@ const CITY_COORDS = {
   Ahmedabad: { latitude: 23.0225, longitude: 72.5714 },
 };
 const EARNINGS = [
-  { label: 'Less than ₹15,000',   value: 14000 },
-  { label: '₹15,000 – ₹22,000',  value: 18000 },
-  { label: '₹22,000 – ₹32,000',  value: 27000 },
-  { label: '₹32,000 – ₹45,000',  value: 38000 },
-  { label: 'More than ₹45,000',  value: 46000 },
+  { label: 'Less than â‚¹15,000',   value: 14000 },
+  { label: 'â‚¹15,000 â€“ â‚¹22,000',  value: 18000 },
+  { label: 'â‚¹22,000 â€“ â‚¹32,000',  value: 27000 },
+  { label: 'â‚¹32,000 â€“ â‚¹45,000',  value: 38000 },
+  { label: 'More than â‚¹45,000',  value: 46000 },
 ];
 const RISK_CATEGORIES = [
   { label: 'Low Risk',       value: 'low_risk_zone' },
@@ -28,9 +28,9 @@ const RISK_CATEGORIES = [
   { label: 'Very High Risk', value: 'very_high_risk_zone' },
 ];
 const PLANS = [
-  { tier: 'basic',    premium: 25,  coverage: 300,  icon: '🌱' },
-  { tier: 'standard', premium: 40,  coverage: 500,  icon: '⚡' },
-  { tier: 'premium',  premium: 60,  coverage: 700,  icon: '👑' },
+  { tier: 'basic',    premium: 25,  coverage: 300,  icon: 'ðŸŒ±' },
+  { tier: 'standard', premium: 40,  coverage: 500,  icon: 'âš¡' },
+  { tier: 'premium',  premium: 60,  coverage: 700,  icon: 'ðŸ‘‘' },
 ];
 
 const STEP_LABELS = ['Personal Details', 'Work Details', 'Choose Plan'];
@@ -77,7 +77,7 @@ export default function Register() {
     fetchAiRisk(city);
   };
 
-  /* ── Step 0 → 1 ── */
+  /* â”€â”€ Step 0 â†’ 1 â”€â”€ */
   const validateStep0 = () => {
     if (!form.fullName.trim()) return 'Full name is required.';
     if (!form.emailAddress.trim() || !form.emailAddress.includes('@')) return 'Valid email is required.';
@@ -85,7 +85,7 @@ export default function Register() {
     return '';
   };
 
-  /* ── Step 1 → 2: register ── */
+  /* â”€â”€ Step 1 â†’ 2: register â”€â”€ */
   const handleRegister = async () => {
     if (form.deliveryPlatformNames.length === 0) { setError('Select at least one platform.'); return; }
     setError(''); setLoading(true);
@@ -101,7 +101,7 @@ export default function Register() {
     finally { setLoading(false); }
   };
 
-  /* ── Step 2: subscribe ── */
+  /* â”€â”€ Step 2: subscribe â”€â”€ */
   const handleSubscribe = async () => {
     setError(''); setLoading(true);
     try {
@@ -121,12 +121,12 @@ export default function Register() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  /* ── Success screen ── */
+  /* â”€â”€ Success screen â”€â”€ */
   if (step === 3 && policy) {
     return (
       <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6rem 1rem' }}>
         <div className="card animate-slide-up" style={{ maxWidth: 500, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}>🎉</div>
+          <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}>ðŸŽ‰</div>
           <h2 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>You're Protected!</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '0.9rem' }}>
             Your <strong style={{ color: 'var(--amber)', textTransform: 'capitalize' }}>{policy.selectedPlanTier}</strong> plan
@@ -135,8 +135,8 @@ export default function Register() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
             {[
-              ['Weekly Premium', `₹${policy.weeklyPremiumChargedInRupees}`],
-              ['Max Coverage',   `₹${policy.maximumWeeklyCoverageInRupees}`],
+              ['Weekly Premium', `â‚¹${policy.weeklyPremiumChargedInRupees}`],
+              ['Max Coverage',   `â‚¹${policy.maximumWeeklyCoverageInRupees}`],
             ].map(([l, v]) => (
               <div key={l} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '0.85rem' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{l}</div>
@@ -146,16 +146,16 @@ export default function Register() {
           </div>
 
           <div style={{ marginBottom: '1.25rem', textAlign: 'left' }}>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Partner ID — save this!</div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Partner ID â€” save this!</div>
             <div className="copy-box">
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{registeredPartner.partnerId}</span>
-              <button onClick={copyId}>{copied ? '✓ Copied!' : 'Copy'}</button>
+              <button onClick={copyId}>{copied ? 'âœ“ Copied!' : 'Copy'}</button>
             </div>
           </div>
 
           <button className="btn btn-primary" style={{ width: '100%' }}
             onClick={() => navigate(`/dashboard?id=${registeredPartner.partnerId}`)}>
-            Go to My Dashboard →
+            Go to My Dashboard â†’
           </button>
         </div>
       </div>
@@ -178,7 +178,7 @@ export default function Register() {
             <React.Fragment key={label}>
               <div className="step-item">
                 <div className={`step-num ${i < step ? 'done' : i === step ? 'active' : 'idle'}`}>
-                  {i < step ? '✓' : i + 1}
+                  {i < step ? 'âœ“' : i + 1}
                 </div>
                 <span className={`step-label${i === step ? ' active' : ''}`}>{label}</span>
               </div>
@@ -188,9 +188,9 @@ export default function Register() {
         </div>
 
         <div className="card animate-fade-in">
-          {error && <div className="alert alert-error" style={{ marginBottom: '1.25rem' }}>⚠️ {error}</div>}
+          {error && <div className="alert alert-error" style={{ marginBottom: '1.25rem' }}>âš ï¸ {error}</div>}
 
-          {/* ── Step 0: Personal ── */}
+          {/* â”€â”€ Step 0: Personal â”€â”€ */}
           {step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group">
@@ -209,12 +209,12 @@ export default function Register() {
               </div>
               <button className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: '0.5rem' }}
                 onClick={() => { const e = validateStep0(); if (e) { setError(e); return; } setError(''); setStep(1); }}>
-                Continue →
+                Continue â†’
               </button>
             </div>
           )}
 
-          {/* ── Step 1: Work details ── */}
+          {/* â”€â”€ Step 1: Work details â”€â”€ */}
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group">
@@ -224,7 +224,7 @@ export default function Register() {
                 </select>
                 {riskSuggestion && (
                   <div className="form-hint" style={{ color: 'var(--amber)' }}>
-                    🧠 AI Risk: <strong>{riskSuggestion.assignedRiskCategory.replace(/_/g, ' ')}</strong> (score {riskSuggestion.computedRiskScore})
+                    ðŸ§  AI Risk: <strong>{riskSuggestion.assignedRiskCategory.replace(/_/g, ' ')}</strong> (score {riskSuggestion.computedRiskScore})
                   </div>
                 )}
               </div>
@@ -257,19 +257,19 @@ export default function Register() {
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => { setError(''); setStep(0); }}>← Back</button>
+                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => { setError(''); setStep(0); }}>â† Back</button>
                 <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleRegister} disabled={loading}>
-                  {loading ? <><span className="spinner spinner-sm" /> Registering…</> : 'Register & Choose Plan →'}
+                  {loading ? <><span className="spinner spinner-sm" /> Registeringâ€¦</> : 'Register & Choose Plan â†’'}
                 </button>
               </div>
             </div>
           )}
 
-          {/* ── Step 2: Plan ── */}
+          {/* â”€â”€ Step 2: Plan â”€â”€ */}
           {step === 2 && registeredPartner && (
             <div>
               <div className="alert alert-success" style={{ marginBottom: '1.25rem' }}>
-                ✓ Registered as <strong>{registeredPartner.fullName}</strong> in {registeredPartner.primaryDeliveryCity}
+                âœ“ Registered as <strong>{registeredPartner.fullName}</strong> in {registeredPartner.primaryDeliveryCity}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
@@ -286,16 +286,16 @@ export default function Register() {
                     <span style={{ fontSize: '1.4rem' }}>{p.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, textTransform: 'capitalize' }}>{p.tier}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Up to ₹{p.coverage} coverage/week</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Up to â‚¹{p.coverage} coverage/week</div>
                     </div>
-                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--amber)' }}>₹{p.premium}<span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>/wk</span></div>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--amber)' }}>â‚¹{p.premium}<span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>/wk</span></div>
                   </label>
                 ))}
               </div>
 
               <button className="btn btn-primary btn-lg" style={{ width: '100%' }}
                 onClick={handleSubscribe} disabled={loading}>
-                {loading ? <><span className="spinner spinner-sm" /> Activating…</> : `Activate ${selectedPlan} plan →`}
+                {loading ? <><span className="spinner spinner-sm" /> Activatingâ€¦</> : `Activate ${selectedPlan} plan â†’`}
               </button>
             </div>
           )}
@@ -304,3 +304,4 @@ export default function Register() {
     </div>
   );
 }
+

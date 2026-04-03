@@ -1,5 +1,5 @@
-"""
-Risk assessment module for the GigShield parametric insurance platform.
+﻿"""
+Risk assessment module for the RakshaRide parametric insurance platform.
 
 Calculates a location-based risk score for each delivery zone by analysing:
   - Historical frequency of weather disruptions in the area
@@ -95,7 +95,7 @@ def calculate_average_estimated_income_loss_percentage(
         historical_disruption_records: All recorded disruptions for the zone.
 
     Returns:
-        Mean income loss percentage (0–100), or 0.0 if no records exist.
+        Mean income loss percentage (0â€“100), or 0.0 if no records exist.
     """
     if not historical_disruption_records:
         return 0.0
@@ -146,7 +146,7 @@ def compute_location_risk_score(
     Args:
         average_weekly_disruption_frequency: Mean number of disruptions
             per week.
-        average_income_loss_percentage: Mean income loss per disruption (0–100).
+        average_income_loss_percentage: Mean income loss per disruption (0â€“100).
         frequency_weight: Weight for the frequency component.
         severity_weight: Weight for the severity component.
 
@@ -242,3 +242,4 @@ def assess_delivery_zone_risk_profile(
         assigned_risk_category=assigned_risk_category,
         historical_disruption_records=historical_disruption_records,
     )
+

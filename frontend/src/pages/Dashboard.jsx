@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { getPartner, getPartnerClaims, submitClaim, listDisruptionEvents } from '../api/gigshieldApi';
+import { getPartner, getPartnerClaims, submitClaim, listDisruptionEvents } from '../api/rakshaRideApi';
 import StatusBadge from '../components/StatusBadge';
 
 function ProgressBar({ value, max, color = 'amber' }) {
@@ -69,10 +69,10 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
             <label className="form-label">Disruption Event</label>
             <select className="form-select" value={form.triggeringDisruptionEventId}
               onChange={e => set('triggeringDisruptionEventId', e.target.value)}>
-              <option value="">— Select event —</option>
+              <option value="">â€” Select event â€”</option>
               {events.map(ev => (
                 <option key={ev._id} value={ev._id}>
-                  {ev.disruptionType.replace(/_/g, ' ')} — {ev.affectedCityName} ({new Date(ev.disruptionStartTimestamp).toLocaleDateString()})
+                  {ev.disruptionType.replace(/_/g, ' ')} â€” {ev.affectedCityName} ({new Date(ev.disruptionStartTimestamp).toLocaleDateString()})
                 </option>
               ))}
             </select>
@@ -85,7 +85,7 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
               <input className="form-input" type="number" value={form.rainfallInMillimetres} onChange={e => set('rainfallInMillimetres', e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Temp (°C)</label>
+              <label className="form-label">Temp (Â°C)</label>
               <input className="form-input" type="number" value={form.temperatureInCelsius} onChange={e => set('temperatureInCelsius', e.target.value)} />
             </div>
           </div>
@@ -120,7 +120,7 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
           <button className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
-            {loading ? <><span className="spinner spinner-sm" /> Processing…</> : 'Submit Claim'}
+            {loading ? <><span className="spinner spinner-sm" /> Processingâ€¦</> : 'Submit Claim'}
           </button>
         </div>
       </div>
@@ -199,11 +199,11 @@ export default function Dashboard() {
         {/* Search */}
         {!partner && !loading && (
           <div style={{ maxWidth: 480, margin: '3rem auto', textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>ðŸ”</div>
             <h2 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Find Your Profile</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Enter your Partner ID received after registration.</p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <input className="form-input" placeholder="Enter Partner ID…"
+              <input className="form-input" placeholder="Enter Partner IDâ€¦"
                 value={inputId} onChange={e => setInputId(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSearch()} style={{ flex: 1 }} />
               <button className="btn btn-primary" onClick={handleSearch}>Search</button>
@@ -220,8 +220,8 @@ export default function Dashboard() {
             {claimResult && (
               <div className={`alert ${claimResult.wasAutoApproved ? 'alert-success' : 'alert-warning'}`}>
                 {claimResult.wasAutoApproved
-                  ? `✅ Claim approved! Payout of ₹${claimResult.claim?.approvedPayoutAmountInRupees || '—'} initiated.`
-                  : '⚠️ Claim submitted and flagged for manual review.'}
+                  ? `âœ… Claim approved! Payout of â‚¹${claimResult.claim?.approvedPayoutAmountInRupees || 'â€”'} initiated.`
+                  : 'âš ï¸ Claim submitted and flagged for manual review.'}
               </div>
             )}
 
@@ -245,7 +245,7 @@ export default function Dashboard() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{partner.fullName}</div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                  {partner.emailAddress} · {partner.primaryDeliveryCity}
+                  {partner.emailAddress} Â· {partner.primaryDeliveryCity}
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.35rem', flexWrap: 'wrap' }}>
                   {partner.deliveryPlatformNames?.map(p => (
@@ -259,17 +259,17 @@ export default function Dashboard() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Total Received</div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--emerald)' }}>₹{totalCompensation.toLocaleString('en-IN')}</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--emerald)' }}>â‚¹{totalCompensation.toLocaleString('en-IN')}</div>
               </div>
             </div>
 
             {/* Stats */}
             <div className="stats-grid">
               {[
-                { icon: '📋', cls: 'stat-icon-amber',   label: 'Total Claims',     value: claims.length },
-                { icon: '✅', cls: 'stat-icon-emerald',  label: 'Approved',         value: approvedClaims },
-                { icon: '🛡️', cls: 'stat-icon-sky',     label: 'Coverage Left',    value: policy ? `₹${policy.remainingCoverageInRupees}` : '—' },
-                { icon: '📅', cls: 'stat-icon-indigo',  label: 'Policy Expires',   value: policy ? new Date(policy.policyEndDate).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : 'No policy' },
+                { icon: 'ðŸ“‹', cls: 'stat-icon-amber',   label: 'Total Claims',     value: claims.length },
+                { icon: 'âœ…', cls: 'stat-icon-emerald',  label: 'Approved',         value: approvedClaims },
+                { icon: 'ðŸ›¡ï¸', cls: 'stat-icon-sky',     label: 'Coverage Left',    value: policy ? `â‚¹${policy.remainingCoverageInRupees}` : 'â€”' },
+                { icon: 'ðŸ“…', cls: 'stat-icon-indigo',  label: 'Policy Expires',   value: policy ? new Date(policy.policyEndDate).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : 'No policy' },
               ].map(s => (
                 <div className="card card-sm stat-card" key={s.label}>
                   <div className={`stat-icon ${s.cls}`}>{s.icon}</div>
@@ -288,9 +288,9 @@ export default function Dashboard() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
                   {[
-                    ['Plan',        policy.selectedPlanTier ? policy.selectedPlanTier.charAt(0).toUpperCase() + policy.selectedPlanTier.slice(1) : '—'],
-                    ['Weekly Premium', `₹${policy.weeklyPremiumChargedInRupees}`],
-                    ['Max Coverage',   `₹${policy.maximumWeeklyCoverageInRupees}`],
+                    ['Plan',        policy.selectedPlanTier ? policy.selectedPlanTier.charAt(0).toUpperCase() + policy.selectedPlanTier.slice(1) : 'â€”'],
+                    ['Weekly Premium', `â‚¹${policy.weeklyPremiumChargedInRupees}`],
+                    ['Max Coverage',   `â‚¹${policy.maximumWeeklyCoverageInRupees}`],
                   ].map(([l, v]) => (
                     <div key={l}>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>{l}</div>
@@ -301,7 +301,7 @@ export default function Dashboard() {
                 <div style={{ marginBottom: '0.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Coverage remaining</span>
-                    <span style={{ fontWeight: 700 }}>₹{policy.remainingCoverageInRupees} / ₹{policy.maximumWeeklyCoverageInRupees}</span>
+                    <span style={{ fontWeight: 700 }}>â‚¹{policy.remainingCoverageInRupees} / â‚¹{policy.maximumWeeklyCoverageInRupees}</span>
                   </div>
                   <ProgressBar
                     value={policy.remainingCoverageInRupees}
@@ -310,14 +310,14 @@ export default function Dashboard() {
                   />
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                  Valid {new Date(policy.policyStartDate).toLocaleDateString('en-IN')} → {new Date(policy.policyEndDate).toLocaleDateString('en-IN')}
+                  Valid {new Date(policy.policyStartDate).toLocaleDateString('en-IN')} â†’ {new Date(policy.policyEndDate).toLocaleDateString('en-IN')}
                 </div>
               </div>
             )}
 
             {!policy && (
               <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📋</div>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>ðŸ“‹</div>
                 <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>No active policy</div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                   Subscribe to a plan to get compensation when disruptions occur.
@@ -332,7 +332,7 @@ export default function Dashboard() {
               {claims.length === 0
                 ? (
                   <div className="empty-state">
-                    <div className="empty-icon">📭</div>
+                    <div className="empty-icon">ðŸ“­</div>
                     <div className="empty-title">No claims yet</div>
                     <div className="empty-sub">When a disruption event occurs, you can submit a claim.</div>
                   </div>
@@ -353,13 +353,13 @@ export default function Dashboard() {
                         {claims.map(c => (
                           <tr key={c._id}>
                             <td>
-                              <div className="td-name">{c.triggeringDisruptionEventId?.disruptionType?.replace(/_/g, ' ') || '—'}</div>
-                              <div className="td-sub">{c.triggeringDisruptionEventId?.affectedCityName || '—'}</div>
+                              <div className="td-name">{c.triggeringDisruptionEventId?.disruptionType?.replace(/_/g, ' ') || 'â€”'}</div>
+                              <div className="td-sub">{c.triggeringDisruptionEventId?.affectedCityName || 'â€”'}</div>
                             </td>
                             <td><StatusBadge status={c.currentClaimStatus} /></td>
-                            <td>₹{c.requestedCompensationAmountInRupees}</td>
+                            <td>â‚¹{c.requestedCompensationAmountInRupees}</td>
                             <td style={{ color: 'var(--emerald)', fontWeight: 700 }}>
-                              {c.approvedPayoutAmountInRupees != null ? `₹${c.approvedPayoutAmountInRupees}` : '—'}
+                              {c.approvedPayoutAmountInRupees != null ? `â‚¹${c.approvedPayoutAmountInRupees}` : 'â€”'}
                             </td>
                             <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                               {new Date(c.claimSubmissionTimestamp).toLocaleDateString('en-IN')}
@@ -388,3 +388,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

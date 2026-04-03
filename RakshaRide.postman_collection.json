@@ -1,8 +1,8 @@
-{
+﻿{
   "info": {
-    "_postman_id": "gigshield-originx-collection",
-    "name": "GigShield — Parametric Insurance API",
-    "description": "Complete API collection for the GigShield parametric insurance platform. Import this into Postman and set the `base_url` variable to `http://localhost:5000`.",
+    "_postman_id": "raksharide-originx-collection",
+    "name": "RakshaRide â€” Parametric Insurance API",
+    "description": "Complete API collection for the RakshaRide parametric insurance platform. Import this into Postman and set the `base_url` variable to `http://localhost:5000`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -165,7 +165,7 @@
           }
         },
         {
-          "name": "Subscribe to Policy (Direct — no payment)",
+          "name": "Subscribe to Policy (Direct â€” no payment)",
           "event": [
             {
               "listen": "test",
@@ -445,7 +445,7 @@
           }
         },
         {
-          "name": "Submit Claim (Likely to be Flagged — bad location)",
+          "name": "Submit Claim (Likely to be Flagged â€” bad location)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -502,7 +502,7 @@
           }
         },
         {
-          "name": "Admin Review — Approve Flagged Claim",
+          "name": "Admin Review â€” Approve Flagged Claim",
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -518,7 +518,7 @@
           }
         },
         {
-          "name": "Admin Review — Reject Flagged Claim",
+          "name": "Admin Review â€” Reject Flagged Claim",
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -537,3 +537,4 @@
     }
   ]
 }
+
