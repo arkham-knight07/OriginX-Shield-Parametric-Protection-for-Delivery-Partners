@@ -317,7 +317,7 @@ async function processIncomingInsuranceClaim(incomingClaimRequestData) {
     23, 59, 59, 999
   ));
 
-  const todayCityPayoutAggregate = await DisruptionEvent.aggregate([
+  const eventDayCityPayoutAggregate = await DisruptionEvent.aggregate([
     {
       $match: {
         affectedCityName: triggeringDisruptionEvent.affectedCityName,
@@ -332,7 +332,7 @@ async function processIncomingInsuranceClaim(incomingClaimRequestData) {
     },
   ]);
 
-  const cityPayoutToDate = Number(todayCityPayoutAggregate?.[0]?.total || 0);
+  const cityPayoutToDate = Number(eventDayCityPayoutAggregate?.[0]?.total || 0);
   if (
     cityPayoutToDate + requestedCompensationAmountInRupees
     > RISK_CONTROL_LIMITS.MAXIMUM_CITY_DAILY_PAYOUT_IN_RUPEES
