@@ -74,9 +74,17 @@ Example (Standard plan in monsoon):
 
 Projected loss ratio shown in `pricingJustification` is:
 
-`Projected Loss Ratio = (Coverage × Expected Payout Severity Ratio) / Premium`
+Let:
+- `C` = maximum weekly coverage of selected plan
+- `e` = expected payout severity ratio
 
-where expected payout severity ratio is currently `0.30`.
+Then:
+
+`Projected Loss Ratio = (C × e) / Premium`
+
+Using the same example with Standard plan coverage:
+- `C = 500`, `e = 0.30`, `Premium = 64`
+- `Projected Loss Ratio = (500 × 0.30) / 64 = 150 / 64 = 2.34` (rounded to 2 decimals)
 
 AI-assisted risk hint during registration:
 
