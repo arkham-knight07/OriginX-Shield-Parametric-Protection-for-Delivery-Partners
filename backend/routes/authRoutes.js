@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const { body } = require('express-validator');
 const { validateIncomingRequest } = require('../middleware/validationMiddleware');
 const { authenticateRequestToken, requireAdminRole } = require('../middleware/authMiddleware');
+const { getJwtSecret } = require('../config/authConfig');
 const AdminUser = require('../models/AdminUser');
 
 const authRouter = express.Router();
@@ -62,7 +63,7 @@ authRouter.post(
   validateIncomingRequest,
   async (request, response) => {
     const { emailAddress, password } = request.body;
-    const jwtSecret = process.env.JWT_SECRET_KEY;
+    const jwtSecret = getJwtSecret();
 
     if (!jwtSecret) {
       return response.status(500).json({
@@ -173,7 +174,7 @@ authRouter.post(
     const { username, password } = request.body;
     const configuredUsername = process.env.AUTH_DEMO_USERNAME || 'admin';
     const configuredPasswordHash = process.env.AUTH_DEMO_PASSWORD_HASH || '';
-    const jwtSecret = process.env.JWT_SECRET_KEY;
+    const jwtSecret = getJwtSecret();
 
     if (!jwtSecret) {
       return response.status(500).json({

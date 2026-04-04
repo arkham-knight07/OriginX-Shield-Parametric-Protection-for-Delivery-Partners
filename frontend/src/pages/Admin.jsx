@@ -63,17 +63,37 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [f, e, p, adminList] = await Promise.all([
+      const [f, e, p, adminList] = await Promise.allSettled([
         getFlaggedClaims({ limit: 50 }, adminAccessToken),
         listDisruptionEvents({ limit: 30 }),
         listPartners({ limit: 100 }),
         listAdminUsers(adminAccessToken),
       ]);
-      setFlagged(f.flaggedClaims || []);
-      setEvents(e.disruptionEvents || []);
-      setPartners(p.deliveryPartners || []);
-      setAdminUsers(adminList.adminUsers || []);
-    } catch (err) { showToast('Failed to load data: ' + err.message); }
+
+      if (f.status === 'fulfilled') {
+        setFlagged(f.value.flaggedClaims || []);
+      }
+      if (e.status === 'fulfilled') {
+        setEvents(e.value.disruptionEvents || []);
+      }
+      if (p.status === 'fulfilled') {
+        setPartners(p.value.deliveryPartners || []);
+      }
+      if (adminList.status === 'fulfilled') {
+        setAdminUsers(adminList.value.adminUsers || []);
+      }
+
+      const failedResponses = [f, e, p, adminList].filter((response) => response.status === 'rejected');
+      if (failedResponses.length > 0) {
+        const combinedErrorMessage = failedResponses
+          .map((response) => response.reason?.message)
+          .filter(Boolean)
+          .join(' | ');
+        showToast(`Some data failed to load: ${combinedErrorMessage || 'Unknown error.'}`);
+      }
+    } catch (err) {
+      showToast('Failed to load data: ' + err.message);
+    }
     finally { setLoading(false); }
   }, [adminAccessToken]);
 

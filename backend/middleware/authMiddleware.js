@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { getJwtSecret } = require('../config/authConfig');
 
 const DEFAULT_AUTH_HEADER_PREFIX = 'Bearer ';
 
@@ -13,7 +14,7 @@ function authenticateRequestToken(request, response, next) {
   }
 
   const token = authHeaderValue.slice(DEFAULT_AUTH_HEADER_PREFIX.length).trim();
-  const jwtSecret = process.env.JWT_SECRET_KEY;
+  const jwtSecret = getJwtSecret();
 
   if (!jwtSecret) {
     return response.status(500).json({
