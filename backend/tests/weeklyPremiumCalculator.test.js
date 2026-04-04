@@ -124,9 +124,9 @@ describe('identifyPersonaEarningsBand', () => {
     expect(earningsBand.averageDailyEarningsInRupees).toBe(1000);
   });
 
-  test('falls back to mid-tier band for out-of-range value', () => {
+  test('maps earnings above highest configured band to highest-activity band', () => {
     const earningsBand = identifyPersonaEarningsBand(100000);
-    expect(earningsBand.averageDailyEarningsInRupees).toBe(1000);
+    expect(earningsBand.averageDailyEarningsInRupees).toBe(1400);
   });
 });
 

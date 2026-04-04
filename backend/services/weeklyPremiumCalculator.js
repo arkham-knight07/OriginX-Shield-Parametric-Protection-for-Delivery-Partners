@@ -115,6 +115,15 @@ function identifyPersonaEarningsBand(monthlyEarningsInRupees) {
   const highestDefinedBandMaximum = Math.max(
     ...personaBands.map((band) => band.monthlyEarningsInRupeesRange[1])
   );
+  const highestBand = personaBands.reduce((currentHighestBand, band) => {
+    if (!currentHighestBand) {
+      return band;
+    }
+
+    return band.monthlyEarningsInRupeesRange[1] > currentHighestBand.monthlyEarningsInRupeesRange[1]
+      ? band
+      : currentHighestBand;
+  }, null);
 
   const matchedBands = personaBands.filter((band) => {
     const [minimum, maximum] = band.monthlyEarningsInRupeesRange;
@@ -126,6 +135,10 @@ function identifyPersonaEarningsBand(monthlyEarningsInRupees) {
     return matchedBands.sort((leftBand, rightBand) => {
       return rightBand.monthlyEarningsInRupeesRange[0] - leftBand.monthlyEarningsInRupeesRange[0];
     })[0];
+  }
+
+  if (earnings > highestDefinedBandMaximum && highestBand) {
+    return highestBand;
   }
 
   return DELIVERY_PARTNER_PERSONA_EARNINGS_BANDS.MID_TIER;
