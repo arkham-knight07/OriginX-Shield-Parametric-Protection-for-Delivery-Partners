@@ -9,8 +9,8 @@ const AI   = import.meta.env.VITE_AI_BASE_URL  || '/ai';
 async function request(url, options = {}) {
   try {
     const res = await fetch(url, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
       ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     });
 
     const contentType = res.headers.get('content-type') || '';
