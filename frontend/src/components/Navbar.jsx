@@ -7,7 +7,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
         <span className="logo-icon">🛡️</span>
-        Gig<span>Shield</span>
+        Raksha<span>Ride</span>
       </div>
 
       <div className="navbar-links">

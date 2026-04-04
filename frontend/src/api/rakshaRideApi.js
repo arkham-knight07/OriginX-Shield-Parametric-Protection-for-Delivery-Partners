@@ -7,13 +7,30 @@ const BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const AI   = import.meta.env.VITE_AI_BASE_URL  || '/ai';
 
 async function request(url, options = {}) {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.errorDetails || data.error || data.message || 'Request failed');
-  return data;
+  try {
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json', ...options.headers },
+      ...options,
+    });
+
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await res.json()
+      : { message: await res.text() };
+
+    if (!res.ok) {
+      throw new Error(data.errorDetails || data.error || data.message || 'Request failed');
+    }
+
+    return data;
+  } catch (error) {
+    // Safari often reports network/CORS failures as "Load failed".
+    if (error?.name === 'TypeError') {
+      throw new Error('Network error. Please check your deployed API URL and CORS configuration.');
+    }
+
+    throw error;
+  }
 }
 
 // â”€â”€â”€ Delivery Partners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

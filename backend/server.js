@@ -22,10 +22,40 @@ const authRouter = require('./routes/authRoutes');
 
 const HTTP_SERVER_PORT = Number(process.env.PORT || '5000');
 const FRONTEND_URL = process.env.FRONTEND_URL;
+const FRONTEND_URLS = (FRONTEND_URL || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const expressApplication = express();
 
-expressApplication.use(cors({ origin: FRONTEND_URL || true, credentials: true }));
+const isAllowedVercelOrigin = (origin = '') => {
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname.endsWith('.vercel.app');
+  } catch {
+    return false;
+  }
+};
+
+expressApplication.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (FRONTEND_URLS.length === 0) {
+      return callback(null, true);
+    }
+
+    if (FRONTEND_URLS.includes(origin) || isAllowedVercelOrigin(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 expressApplication.use(express.json());
 
 // â”€â”€â”€ API Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
