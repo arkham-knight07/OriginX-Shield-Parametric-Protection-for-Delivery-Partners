@@ -13,7 +13,23 @@ function ProgressBar({ value, max, color = 'amber' }) {
 }
 
 function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
+  const DISRUPTION_TYPE_OPTIONS = [
+    'heavy_rainfall',
+    'extreme_heat',
+    'hazardous_air_quality',
+    'lpg_shortage',
+    'area_curfew',
+    'flooding',
+    'cyclone_alert',
+    'thunderstorm',
+    'waterlogging',
+    'road_blockage',
+    'other',
+  ];
+
   const [form, setForm] = useState({
+    selectedDisruptionType: '',
+    customDisruptionTypeLabel: '',
     triggeringDisruptionEventId: '',
     rainfallInMillimetres: 85,
     temperatureInCelsius: 30,
@@ -27,6 +43,24 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
   const [error, setError] = useState('');
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const filteredEvents = events.filter((eventItem) => {
+    if (!form.selectedDisruptionType) {
+      return true;
+    }
+
+    if (form.selectedDisruptionType === 'other') {
+      const customTypeQuery = String(form.customDisruptionTypeLabel || '').trim().toLowerCase();
+      if (!customTypeQuery) {
+        return eventItem.disruptionType === 'other';
+      }
+
+      return eventItem.disruptionType === 'other'
+        && String(eventItem.customDisruptionTypeLabel || '').toLowerCase().includes(customTypeQuery);
+    }
+
+    return eventItem.disruptionType === form.selectedDisruptionType;
+  });
 
   const handleSubmit = async () => {
     if (!form.triggeringDisruptionEventId) { setError('Select a disruption event.'); return; }
@@ -72,16 +106,62 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
           )}
 
           <div className="form-group">
+            <label className="form-label">Disruption Type</label>
+            <select
+              className="form-select"
+              value={form.selectedDisruptionType}
+              onChange={e => {
+                const selectedType = e.target.value;
+                set('selectedDisruptionType', selectedType);
+                set('triggeringDisruptionEventId', '');
+                if (selectedType !== 'other') {
+                  set('customDisruptionTypeLabel', '');
+                }
+              }}
+            >
+              <option value="">All event types</option>
+              {DISRUPTION_TYPE_OPTIONS.map((typeOption) => (
+                <option key={typeOption} value={typeOption}>
+                  {typeOption.replace(/_/g, ' ')}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {form.selectedDisruptionType === 'other' && (
+            <div className="form-group">
+              <label className="form-label">Other Type Name</label>
+              <input
+                className="form-input"
+                placeholder="Enter custom type (e.g. protest)"
+                value={form.customDisruptionTypeLabel}
+                onChange={e => {
+                  set('customDisruptionTypeLabel', e.target.value);
+                  set('triggeringDisruptionEventId', '');
+                }}
+              />
+            </div>
+          )}
+
+          <div className="form-group">
             <label className="form-label">Disruption Event</label>
             <select className="form-select" value={form.triggeringDisruptionEventId}
               onChange={e => set('triggeringDisruptionEventId', e.target.value)}>
               <option value=""> Select event </option>
-              {events.map(ev => (
+              {filteredEvents.map(ev => (
                 <option key={ev._id} value={ev._id}>
-                  {ev.disruptionType.replace(/_/g, ' ')}  {ev.affectedCityName} ({new Date(ev.disruptionStartTimestamp).toLocaleDateString()})
+                  {(ev.disruptionType === 'other' && ev.customDisruptionTypeLabel
+                    ? ev.customDisruptionTypeLabel
+                    : ev.disruptionType.replace(/_/g, ' '))}
+                  {' '}- {ev.affectedCityName} ({new Date(ev.disruptionStartTimestamp).toLocaleDateString()})
                 </option>
               ))}
             </select>
+            {events.length > 0 && filteredEvents.length === 0 && (
+              <div className="form-hint" style={{ color: 'var(--text-muted)' }}>
+                No events match this type. Try another type or ask admin to create one.
+              </div>
+            )}
           </div>
 
           <div style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Environmental Conditions</div>
