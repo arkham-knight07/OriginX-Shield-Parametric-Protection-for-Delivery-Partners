@@ -374,10 +374,10 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
             {/* Stats */}
             <div className="stats-grid">
               {[
-                { icon: '', cls: 'stat-icon-amber',   label: 'Total Claims',     value: claims.length },
-                { icon: '', cls: 'stat-icon-emerald',  label: 'Approved',         value: approvedClaims },
-                { icon: '', cls: 'stat-icon-sky',     label: 'Coverage Left',    value: policy ? formatInr(policy.remainingCoverageInRupees) : '' },
-                { icon: '', cls: 'stat-icon-indigo',  label: 'Policy Expires',   value: policy ? new Date(policy.policyEndDate).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : 'No policy' },
+                { icon: '📄', cls: 'stat-icon-amber',   label: 'Total Claims',     value: claims.length },
+                { icon: '✅', cls: 'stat-icon-emerald',  label: 'Approved',         value: approvedClaims },
+                { icon: '🛡️', cls: 'stat-icon-sky',     label: 'Coverage Left',    value: policy ? formatInr(policy.remainingCoverageInRupees) : '' },
+                { icon: '📅', cls: 'stat-icon-indigo',  label: 'Policy Expires',   value: policy ? new Date(policy.policyEndDate).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : 'No policy' },
               ].map(s => (
                 <div className="card card-sm stat-card" key={s.label}>
                   <div className={`stat-icon ${s.cls}`}>{s.icon}</div>
@@ -425,7 +425,7 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
 
             {!policy && (
               <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}></div>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🛡️</div>
                 <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>No active policy</div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                   Subscribe to a plan to get compensation when disruptions occur.
@@ -496,4 +496,3 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
     </div>
   );
 }
-

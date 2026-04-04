@@ -3,21 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { healthCheck } from '../api/rakshaRideApi';
 
 const PLANS = [
-  { tier: 'basic',    premium: 25,  coverage: 300,  badge: '', popular: false },
-  { tier: 'standard', premium: 40,  coverage: 500,  badge: '', popular: true  },
-  { tier: 'premium',  premium: 60,  coverage: 700,  badge: '', popular: false },
+  { tier: 'basic',    premium: 25,  coverage: 300,  badge: '🛡️', popular: false },
+  { tier: 'standard', premium: 40,  coverage: 500,  badge: '⚡', popular: true  },
+  { tier: 'premium',  premium: 60,  coverage: 700,  badge: '👑', popular: false },
 ];
 
 const TRIGGERS = [
-  { icon: '', label: 'Heavy Rain',     value: '> 50 mm',  color: '#38bdf8' },
-  { icon: '', label: 'Extreme Heat',   value: '> 42 C',  color: '#f59e0b' },
-  { icon: '', label: 'Hazardous AQI',  value: '> 300',    color: '#a78bfa' },
+  { icon: '🌧️', label: 'Heavy Rain',     value: '> 50 mm',  color: '#38bdf8' },
+  { icon: '🌡️', label: 'Extreme Heat',   value: '> 42 C',  color: '#f59e0b' },
+  { icon: '🏭', label: 'Hazardous AQI',  value: '> 300',    color: '#a78bfa' },
 ];
 
 const STEPS = [
-  { icon: '', title: 'Register', desc: 'Sign up and choose a weekly plan tailored to your earnings and city.' },
-  { icon: '', title: 'We Monitor 24/7', desc: 'RakshaRide watches live weather and AQI data across 8 Indian cities.' },
-  { icon: '', title: 'Auto Payout', desc: 'When a threshold is breached, your compensation is triggered instantly.' },
+  { icon: '📝', title: 'Register', desc: 'Sign up and choose a weekly plan tailored to your earnings and city.' },
+  { icon: '📡', title: 'We Monitor 24/7', desc: 'RakshaRide watches live weather and AQI data across 8 Indian cities.' },
+  { icon: '💸', title: 'Auto Payout', desc: 'When a threshold is breached, your compensation is triggered instantly.' },
 ];
 
 const STATS = [
@@ -131,7 +131,7 @@ export default function Landing() {
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--emerald)', animation: 'pulse 1.5s infinite' }} />
                 </div>
 
-                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}></div>
+                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🌧️</div>
                 <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.25rem' }}>Heavy Rainfall Detected</div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Chennai  78 mm in last hour</div>
 
@@ -245,11 +245,11 @@ export default function Landing() {
                 against location consistency, delivery platform activity, and claim frequency
                 patterns before any payout is approved.
               </p>
-              {[
-                ['', 'Location cross-validation', 'GPS vs. network signal (Haversine distance)'],
-                ['', 'Platform activity check', 'Minimum 30 min active on delivery app'],
-                ['', 'Claim frequency analysis', 'Max 3 auto-approvals per week'],
-                ['', 'AI anomaly scoring', 'Python ML model flags unusual patterns'],
+                {[
+                ['📍', 'Location cross-validation', 'GPS vs. network signal (Haversine distance)'],
+                ['📱', 'Platform activity check', 'Minimum 30 min active on delivery app'],
+                ['🧾', 'Claim frequency analysis', 'Max 3 auto-approvals per week'],
+                ['🤖', 'AI anomaly scoring', 'Python ML model flags unusual patterns'],
               ].map(([icon, title, desc]) => (
                 <div key={title} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
                   <div style={{
@@ -267,10 +267,10 @@ export default function Landing() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               {[
-                { label: 'Claims processed',       value: '12,400+', icon: '' },
-                { label: 'Auto-approved',           value: '94.2%',   icon: '' },
-                { label: 'Fraud attempts blocked',  value: '340+',    icon: '' },
-                { label: 'Avg payout time',         value: '< 2 sec', icon: '' },
+                { label: 'Claims processed',       value: '12,400+', icon: '🧾' },
+                { label: 'Auto-approved',           value: '94.2%',   icon: '✅' },
+                { label: 'Fraud attempts blocked',  value: '340+',    icon: '🛑' },
+                { label: 'Avg payout time',         value: '< 2 sec', icon: '⚡' },
               ].map(s => (
                 <div className="card" key={s.label} style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>{s.icon}</div>
@@ -317,4 +317,3 @@ export default function Landing() {
     </div>
   );
 }
-

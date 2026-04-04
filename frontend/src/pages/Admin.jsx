@@ -290,10 +290,10 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
     }
   };
   const stats = [
-    { icon: '', cls: 'stat-icon-indigo', label: 'Flagged Claims',   value: flagged.length },
-    { icon: '', cls: 'stat-icon-amber',  label: 'Active Events',    value: events.filter(e => !e.hasAutomaticClaimTriggerBeenFired).length },
-    { icon: '', cls: 'stat-icon-sky',    label: 'Total Partners',   value: partners.length },
-    { icon: '', cls: 'stat-icon-emerald',label: 'Verified Partners', value: partners.filter(p => p.isAccountVerified).length },
+    { icon: '🚩', cls: 'stat-icon-indigo', label: 'Flagged Claims',   value: flagged.length },
+    { icon: '⚠️', cls: 'stat-icon-amber',  label: 'Active Events',    value: events.filter(e => !e.hasAutomaticClaimTriggerBeenFired).length },
+    { icon: '👥', cls: 'stat-icon-sky',    label: 'Total Partners',   value: partners.length },
+    { icon: '✅', cls: 'stat-icon-emerald',label: 'Verified Partners', value: partners.filter(p => p.isAccountVerified).length },
   ];
 
   const TABS = [
@@ -746,4 +746,3 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
     </div>
   );
 }
-
