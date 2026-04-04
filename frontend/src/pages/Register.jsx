@@ -34,9 +34,9 @@ const RISK_CATEGORIES = [
   { label: 'Very High Risk', value: 'very_high_risk_zone' },
 ];
 const PLANS = [
-  { tier: 'basic',    premium: 25,  coverage: 300,  icon: '' },
-  { tier: 'standard', premium: 40,  coverage: 500,  icon: '' },
-  { tier: 'premium',  premium: 60,  coverage: 700,  icon: '' },
+  { tier: 'basic',    premium: 25,  coverage: 300,  icon: '🛡️' },
+  { tier: 'standard', premium: 40,  coverage: 500,  icon: '⚡' },
+  { tier: 'premium',  premium: 60,  coverage: 700,  icon: '👑' },
 ];
 
 const STEP_LABELS = ['Personal Details', 'Work Details', 'Verify Email', 'Choose Plan'];
@@ -188,7 +188,7 @@ export default function Register() {
     return (
       <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6rem 1rem' }}>
         <div className="card animate-slide-up" style={{ maxWidth: 500, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}></div>
+          <div style={{ fontSize: '3.5rem', marginBottom: '0.75rem' }}>🎉</div>
           <h2 style={{ fontWeight: 800, marginBottom: '0.5rem' }}>You're Protected!</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '0.9rem' }}>
             Your <strong style={{ color: 'var(--amber)', textTransform: 'capitalize' }}>{policy.selectedPlanTier}</strong> plan
@@ -240,7 +240,7 @@ export default function Register() {
             <React.Fragment key={label}>
               <div className="step-item">
                 <div className={`step-num ${i < step ? 'done' : i === step ? 'active' : 'idle'}`}>
-                  {i < step ? '' : i + 1}
+                  {i < step ? '✓' : i + 1}
                 </div>
                 <span className={`step-label${i === step ? ' active' : ''}`}>{label}</span>
               </div>
@@ -406,4 +406,3 @@ export default function Register() {
     </div>
   );
 }
-
