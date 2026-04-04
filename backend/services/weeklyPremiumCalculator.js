@@ -112,9 +112,20 @@ function getPlatformRiskMultiplier(deliveryPlatformNames = []) {
 function identifyPersonaEarningsBand(monthlyEarningsInRupees) {
   const earnings = Number(monthlyEarningsInRupees) || 0;
   const personaBands = Object.values(DELIVERY_PARTNER_PERSONA_EARNINGS_BANDS);
-  const highestDefinedBandMaximum = Math.max(
-    ...personaBands.map((band) => band.monthlyEarningsInRupeesRange[1])
-  );
+  if (personaBands.length === 0) {
+    throw new Error('No persona earnings bands configured for premium calculation.');
+  }
+
+  const highestBand = personaBands.reduce((currentHighestBand, band) => {
+    if (!currentHighestBand) {
+      return band;
+    }
+
+    return band.monthlyEarningsInRupeesRange[1] > currentHighestBand.monthlyEarningsInRupeesRange[1]
+      ? band
+      : currentHighestBand;
+  }, null);
+  const highestDefinedBandMaximum = highestBand.monthlyEarningsInRupeesRange[1];
 
   const matchedBands = personaBands.filter((band) => {
     const [minimum, maximum] = band.monthlyEarningsInRupeesRange;
@@ -126,6 +137,10 @@ function identifyPersonaEarningsBand(monthlyEarningsInRupees) {
     return matchedBands.sort((leftBand, rightBand) => {
       return rightBand.monthlyEarningsInRupeesRange[0] - leftBand.monthlyEarningsInRupeesRange[0];
     })[0];
+  }
+
+  if (earnings > highestDefinedBandMaximum) {
+    return highestBand;
   }
 
   return DELIVERY_PARTNER_PERSONA_EARNINGS_BANDS.MID_TIER;
