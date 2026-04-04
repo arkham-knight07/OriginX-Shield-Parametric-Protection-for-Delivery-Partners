@@ -24,6 +24,7 @@ const {
 } = require('../services/disruptionThresholdChecker');
 const {
   DISRUPTION_TRIGGER_THRESHOLDS,
+  DISRUPTION_EVENT_TYPES,
   INSURANCE_POLICY_STATUSES,
 } = require('../config/parametricInsuranceConstants');
 
@@ -41,6 +42,7 @@ disruptionEventRouter.post('/', async (request, response) => {
   try {
     const {
       disruptionType,
+      customDisruptionTypeLabel,
       affectedCityName,
       affectedZoneCentreCoordinates,
       affectedRadiusInKilometres,
@@ -54,8 +56,22 @@ disruptionEventRouter.post('/', async (request, response) => {
       policyExclusionTag,
     } = request.body;
 
+    if (
+      disruptionType === DISRUPTION_EVENT_TYPES.OTHER &&
+      !String(customDisruptionTypeLabel || '').trim()
+    ) {
+      return response.status(400).json({
+        success: false,
+        message: 'customDisruptionTypeLabel is required when disruptionType is other.',
+      });
+    }
+
     const newDisruptionEvent = new DisruptionEvent({
       disruptionType,
+      customDisruptionTypeLabel:
+        disruptionType === DISRUPTION_EVENT_TYPES.OTHER
+          ? String(customDisruptionTypeLabel).trim()
+          : null,
       affectedCityName,
       affectedZoneCentreCoordinates,
       affectedRadiusInKilometres,

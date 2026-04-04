@@ -6,6 +6,20 @@ import {
 import StatusBadge from '../components/StatusBadge';
 
 export default function Admin() {
+  const DISRUPTION_TYPE_OPTIONS = [
+    'heavy_rainfall',
+    'extreme_heat',
+    'hazardous_air_quality',
+    'lpg_shortage',
+    'area_curfew',
+    'flooding',
+    'cyclone_alert',
+    'thunderstorm',
+    'waterlogging',
+    'road_blockage',
+    'other',
+  ];
+
   const ADMIN_SESSION_STORAGE_KEY = 'raksharide_admin_unlocked';
   const [flagged,   setFlagged]   = useState([]);
   const [events,    setEvents]    = useState([]);
@@ -21,6 +35,7 @@ export default function Admin() {
   // New event form
   const [newEvent, setNewEvent] = useState({
     disruptionType: 'heavy_rainfall', affectedCityName: 'Chennai',
+    customDisruptionTypeLabel: '',
     measuredRainfallInMillimetres: 85, measuredTemperatureInCelsius: 30, measuredAirQualityIndex: 120,
     measuredLpgShortageSeverityIndex: 0,
     affectedRadiusInKilometres: 15,
@@ -81,6 +96,14 @@ export default function Admin() {
   };
 
   const handleCreateEvent = async () => {
+    if (
+      newEvent.disruptionType === 'other' &&
+      !String(newEvent.customDisruptionTypeLabel || '').trim()
+    ) {
+      showToast('Please add a custom disruption name for Other type.');
+      return;
+    }
+
     setCreating(true);
     try {
       await createDisruptionEvent({
@@ -275,11 +298,23 @@ export default function Admin() {
                 <div className="form-group">
                   <label className="form-label">Type</label>
                   <select className="form-select" value={newEvent.disruptionType} onChange={e => setEvt('disruptionType', e.target.value)}>
-                    {['heavy_rainfall', 'extreme_heat', 'hazardous_air_quality', 'lpg_shortage', 'area_curfew', 'flooding'].map(t => (
+                    {DISRUPTION_TYPE_OPTIONS.map(t => (
                       <option key={t} value={t}>{t.replace(/_/g,' ')}</option>
                     ))}
                   </select>
                 </div>
+                {newEvent.disruptionType === 'other' && (
+                  <div className="form-group">
+                    <label className="form-label">Custom Type Name</label>
+                    <input
+                      className="form-input"
+                      type="text"
+                      placeholder="e.g. political_strike"
+                      value={newEvent.customDisruptionTypeLabel}
+                      onChange={e => setEvt('customDisruptionTypeLabel', e.target.value)}
+                    />
+                  </div>
+                )}
                 <div className="form-group">
                   <label className="form-label">City</label>
                   <select className="form-select" value={newEvent.affectedCityName}
@@ -333,7 +368,11 @@ export default function Admin() {
                     <tbody>
                       {events.map(ev => (
                         <tr key={ev._id}>
-                          <td><StatusBadge status={ev.disruptionType} /></td>
+                          <td>
+                            {ev.disruptionType === 'other' && ev.customDisruptionTypeLabel
+                              ? <StatusBadge status={ev.customDisruptionTypeLabel} />
+                              : <StatusBadge status={ev.disruptionType} />}
+                          </td>
                           <td>{ev.affectedCityName}</td>
                           <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                             {ev.measuredRainfallInMillimetres != null && ` ${ev.measuredRainfallInMillimetres}mm `}

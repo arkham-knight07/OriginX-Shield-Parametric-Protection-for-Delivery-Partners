@@ -15,11 +15,11 @@ const CITY_COORDS = {
   Ahmedabad: { latitude: 23.0225, longitude: 72.5714 },
 };
 const EARNINGS = [
-  { label: 'Less than 15,000',   value: 14000 },
-  { label: '15,000  22,000',  value: 18000 },
-  { label: '22,000  32,000',  value: 27000 },
-  { label: '32,000  45,000',  value: 38000 },
-  { label: 'More than 45,000',  value: 46000 },
+  { label: 'Less than 15000', value: 14000 },
+  { label: '15000 - 22000', value: 18000 },
+  { label: '22000 - 32000', value: 27000 },
+  { label: '32000 - 45000', value: 38000 },
+  { label: 'More than 45000', value: 46000 },
 ];
 const RISK_CATEGORIES = [
   { label: 'Low Risk',       value: 'low_risk_zone' },

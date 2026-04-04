@@ -20,6 +20,11 @@ const STATUS_MAP = {
   lpg_shortage:             { label: '⛽ LPG Shortage', cls: 'badge-pending' },
   area_curfew:              { label: '🚫 Curfew',       cls: 'badge-rejected'},
   flooding:                 { label: '🌊 Flooding',     cls: 'badge-info'   },
+  cyclone_alert:            { label: '🌀 Cyclone Alert', cls: 'badge-flagged' },
+  thunderstorm:             { label: '⛈ Thunderstorm',  cls: 'badge-pending' },
+  waterlogging:             { label: '💧 Waterlogging',  cls: 'badge-info' },
+  road_blockage:            { label: '🚧 Road Blockage', cls: 'badge-rejected' },
+  other:                    { label: 'Other',            cls: 'badge-info' },
 };
 
 export default function StatusBadge({ status }) {

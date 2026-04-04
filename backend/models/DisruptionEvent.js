@@ -22,6 +22,12 @@ const disruptionEventSchema = new mongoose.Schema(
       required: [true, 'Disruption event type is required'],
     },
 
+    customDisruptionTypeLabel: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+
     affectedCityName: {
       type: String,
       required: [true, 'Affected city name is required'],

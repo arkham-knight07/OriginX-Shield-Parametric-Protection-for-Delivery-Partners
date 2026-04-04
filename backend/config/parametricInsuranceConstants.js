@@ -162,6 +162,11 @@ const DISRUPTION_EVENT_TYPES = {
   LPG_SHORTAGE: 'lpg_shortage',
   AREA_CURFEW: 'area_curfew',
   FLOODING: 'flooding',
+  CYCLONE_ALERT: 'cyclone_alert',
+  THUNDERSTORM: 'thunderstorm',
+  WATERLOGGING: 'waterlogging',
+  ROAD_BLOCKAGE: 'road_blockage',
+  OTHER: 'other',
 };
 
 /**
