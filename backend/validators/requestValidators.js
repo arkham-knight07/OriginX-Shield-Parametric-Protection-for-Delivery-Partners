@@ -3,6 +3,7 @@ const { body, param } = require('express-validator');
 const deliveryPartnerRegistrationValidators = [
   body('fullName').trim().notEmpty().withMessage('fullName is required.'),
   body('emailAddress').isEmail().withMessage('emailAddress must be a valid email.'),
+  body('password').isLength({ min: 6 }).withMessage('password must be at least 6 characters long.'),
   body('mobilePhoneNumber').trim().notEmpty().withMessage('mobilePhoneNumber is required.'),
   body('primaryDeliveryCity').trim().notEmpty().withMessage('primaryDeliveryCity is required.'),
   body('primaryDeliveryZoneCoordinates.latitude')
@@ -14,6 +15,11 @@ const deliveryPartnerRegistrationValidators = [
   body('deliveryPlatformNames')
     .isArray({ min: 1 })
     .withMessage('deliveryPlatformNames must be a non-empty array.'),
+];
+
+const deliveryPartnerLoginValidators = [
+  body('emailAddress').isEmail().withMessage('emailAddress must be a valid email.'),
+  body('password').notEmpty().withMessage('password is required.'),
 ];
 
 const deliveryPartnerIdParamValidators = [
@@ -67,6 +73,7 @@ const claimIdParamValidators = [
 
 module.exports = {
   deliveryPartnerRegistrationValidators,
+  deliveryPartnerLoginValidators,
   deliveryPartnerIdParamValidators,
   subscribePolicyValidators,
   policyIdParamValidators,

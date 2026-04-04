@@ -12,11 +12,13 @@
 'use strict';
 
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const DeliveryPartner = require('../models/DeliveryPartner');
 const { validateIncomingRequest } = require('../middleware/validationMiddleware');
 const { assessCityRiskWithAi } = require('../services/aiIntegrationService');
 const {
   deliveryPartnerRegistrationValidators,
+  deliveryPartnerLoginValidators,
   deliveryPartnerIdParamValidators,
 } = require('../validators/requestValidators');
 
@@ -27,6 +29,52 @@ const ALLOWED_LOCATION_RISK_CATEGORIES = new Set([
   'high_risk_zone',
   'very_high_risk_zone',
 ]);
+
+deliveryPartnerRouter.post(
+  '/login',
+  deliveryPartnerLoginValidators,
+  validateIncomingRequest,
+  async (request, response) => {
+    try {
+      const { emailAddress, password } = request.body;
+
+      const deliveryPartner = await DeliveryPartner.findOne({
+        emailAddress: String(emailAddress).toLowerCase(),
+      }).select('+passwordHash');
+
+      if (!deliveryPartner) {
+        return response.status(401).json({
+          success: false,
+          message: 'Invalid email or password.',
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, deliveryPartner.passwordHash);
+      if (!isPasswordValid) {
+        return response.status(401).json({
+          success: false,
+          message: 'Invalid email or password.',
+        });
+      }
+
+      return response.status(200).json({
+        success: true,
+        message: 'Delivery partner logged in successfully.',
+        deliveryPartner: {
+          partnerId: deliveryPartner._id,
+          fullName: deliveryPartner.fullName,
+          emailAddress: deliveryPartner.emailAddress,
+        },
+      });
+    } catch (loginError) {
+      return response.status(500).json({
+        success: false,
+        message: 'Failed to login delivery partner.',
+        errorDetails: loginError.message,
+      });
+    }
+  }
+);
 
 // ─── POST /api/delivery-partners/register ────────────────────────────────────
 
@@ -50,6 +98,7 @@ deliveryPartnerRouter.post(
     const {
       fullName,
       emailAddress,
+      password,
       mobilePhoneNumber,
       primaryDeliveryCity,
       primaryDeliveryZoneCoordinates,
@@ -96,9 +145,12 @@ deliveryPartnerRouter.post(
       resolvedRiskAssessment = await assessCityRiskWithAi(primaryDeliveryCity);
     }
 
+    const passwordHash = await bcrypt.hash(password, 10);
+
     const newDeliveryPartner = new DeliveryPartner({
       fullName,
       emailAddress,
+      passwordHash,
       mobilePhoneNumber,
       primaryDeliveryCity,
       primaryDeliveryZoneCoordinates,

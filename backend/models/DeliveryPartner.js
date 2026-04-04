@@ -23,6 +23,12 @@ const deliveryPartnerSchema = new mongoose.Schema(
       trim: true,
     },
 
+    passwordHash: {
+      type: String,
+      required: [true, 'Password hash is required'],
+      select: false,
+    },
+
     mobilePhoneNumber: {
       type: String,
       required: [true, 'Mobile phone number is required'],

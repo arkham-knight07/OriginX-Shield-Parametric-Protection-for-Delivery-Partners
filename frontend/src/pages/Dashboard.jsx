@@ -128,12 +128,13 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
   );
 }
 
-export default function Dashboard() {
+export default function Dashboard({ authenticatedPartnerId = '', authenticatedPartnerProfile = null, onPartnerLogout = null }) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [partnerId, setPartnerId] = useState(searchParams.get('id') || '');
-  const [inputId,   setInputId]   = useState(searchParams.get('id') || '');
+  const initialPartnerId = authenticatedPartnerId || searchParams.get('id') || '';
+  const [partnerId, setPartnerId] = useState(initialPartnerId);
+  const [inputId,   setInputId]   = useState(initialPartnerId);
   const [partner,   setPartner]   = useState(null);
   const [claims,    setClaims]    = useState([]);
   const [events,    setEvents]    = useState([]);
@@ -160,6 +161,14 @@ export default function Dashboard() {
 
   useEffect(() => { if (partnerId) load(partnerId); }, [partnerId, load]);
 
+  useEffect(() => {
+    if (authenticatedPartnerId && authenticatedPartnerId !== partnerId) {
+      setPartnerId(authenticatedPartnerId);
+      setInputId(authenticatedPartnerId);
+      navigate(`/dashboard?id=${authenticatedPartnerId}`, { replace: true });
+    }
+  }, [authenticatedPartnerId, navigate, partnerId]);
+
   const handleSearch = () => {
     if (!inputId.trim()) return;
     setPartnerId(inputId.trim());
@@ -183,13 +192,23 @@ export default function Dashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <div className="page-title">My Dashboard</div>
-              <div className="page-sub">Track your policy, claims and payouts</div>
+              <div className="page-sub">
+                Track your policy, claims and payouts
+                {authenticatedPartnerProfile?.emailAddress ? ` | ${authenticatedPartnerProfile.emailAddress}` : ''}
+              </div>
             </div>
-            {partner && (
-              <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                + Submit Claim
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '0.6rem' }}>
+              {partner && (
+                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+                  + Submit Claim
+                </button>
+              )}
+              {onPartnerLogout && (
+                <button className="btn btn-secondary" onClick={onPartnerLogout}>
+                  Logout
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

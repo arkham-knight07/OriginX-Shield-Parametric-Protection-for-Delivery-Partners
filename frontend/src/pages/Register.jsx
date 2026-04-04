@@ -44,6 +44,7 @@ export default function Register() {
 
   const [form, setForm] = useState({
     fullName: '', emailAddress: '', mobilePhoneNumber: '',
+    password: '',
     primaryDeliveryCity: 'Chennai', deliveryPlatformNames: [],
     averageMonthlyEarningsInRupees: 18000, locationRiskCategory: 'moderate_risk_zone',
   });
@@ -81,6 +82,7 @@ export default function Register() {
   const validateStep0 = () => {
     if (!form.fullName.trim()) return 'Full name is required.';
     if (!form.emailAddress.trim() || !form.emailAddress.includes('@')) return 'Valid email is required.';
+    if (!form.password || form.password.length < 6) return 'Password must be at least 6 characters.';
     if (!form.mobilePhoneNumber.trim() || form.mobilePhoneNumber.length < 10) return 'Valid 10-digit phone is required.';
     return '';
   };
@@ -201,6 +203,10 @@ export default function Register() {
                 <div className="form-group">
                   <label className="form-label">Email Address</label>
                   <input className="form-input" type="email" placeholder="raju@example.com" value={form.emailAddress} onChange={e => set('emailAddress', e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input className="form-input" type="password" placeholder="At least 6 characters" value={form.password} onChange={e => set('password', e.target.value)} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Mobile Number</label>
