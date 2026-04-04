@@ -95,7 +95,7 @@ def calculate_average_estimated_income_loss_percentage(
         historical_disruption_records: All recorded disruptions for the zone.
 
     Returns:
-        Mean income loss percentage (0â€“100), or 0.0 if no records exist.
+        Mean income loss percentage (0-100), or 0.0 if no records exist.
     """
     if not historical_disruption_records:
         return 0.0
@@ -146,7 +146,7 @@ def compute_location_risk_score(
     Args:
         average_weekly_disruption_frequency: Mean number of disruptions
             per week.
-        average_income_loss_percentage: Mean income loss per disruption (0â€“100).
+        average_income_loss_percentage: Mean income loss per disruption (0-100).
         frequency_weight: Weight for the frequency component.
         severity_weight: Weight for the severity component.
 

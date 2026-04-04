@@ -1,5 +1,5 @@
 ﻿"""
-GigShield AI Server â€” Flask REST API
+RakshaRide AI Server - Flask REST API
 
 Exposes the existing Python AI modules (risk_assessment.py and
 anomaly_detector.py) as HTTP endpoints so the Node.js backend and
@@ -41,13 +41,13 @@ AI_SERVICE_PUBLIC_BASE_URL = os.environ.get(
 )
 
 
-# â”€â”€â”€ Health â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----- Health -----------------------------------------------------------------
 
 @app.route('/', methods=['GET'])
 def root():
     return jsonify({
         'status': 'ok',
-        'service': 'GigShield AI Server',
+        'service': 'RakshaRide AI Server',
         'message': 'AI service is running. Use /health for health checks.',
     })
 
@@ -55,12 +55,12 @@ def root():
 def health():
     return jsonify({
         'status': 'healthy',
-        'service': 'GigShield AI Server',
+        'service': 'RakshaRide AI Server',
         'port': AI_SERVICE_PORT,
     })
 
 
-# â”€â”€â”€ POST /assess-risk â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----- POST /assess-risk ------------------------------------------------------
 
 @app.route('/assess-risk', methods=['POST'])
 def assess_risk():
@@ -144,7 +144,7 @@ def assess_risk():
         }), 500
 
 
-# â”€â”€â”€ POST /detect-anomaly â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----- POST /detect-anomaly ---------------------------------------------------
 
 @app.route('/detect-anomaly', methods=['POST'])
 def detect_anomaly():
@@ -227,7 +227,7 @@ def detect_anomaly():
         }), 500
 
 
-# â”€â”€â”€ POST /quick-risk-assess â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----- POST /quick-risk-assess ------------------------------------------------
 
 @app.route('/quick-risk-assess', methods=['POST'])
 def quick_risk_assess():
@@ -286,10 +286,10 @@ def quick_risk_assess():
         return jsonify({'success': False, 'error': str(exc)}), 500
 
 
-# â”€â”€â”€ Entry Point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# =============================== Entry Point ===============================
 
 if __name__ == '__main__':
-    print(f'GigShield AI Server starting on {AI_SERVICE_PUBLIC_BASE_URL}')
+    print(f'RakshaRide AI Server starting on {AI_SERVICE_PUBLIC_BASE_URL}')
     app.run(host=AI_SERVICE_HOST, port=AI_SERVICE_PORT, debug=AI_SERVICE_DEBUG)
 
 

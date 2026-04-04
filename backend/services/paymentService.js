@@ -1,9 +1,9 @@
 ﻿/**
- * Payment service â€” Razorpay integration.
+ * Payment service - Razorpay integration.
  *
  * Handles two separate payment flows:
- *   1. Premium collection  â€” worker pays weekly premium via Razorpay Order + Checkout.
- *   2. Claim payout        â€” GigShield transfers compensation to worker's bank account
+ *   1. Premium collection  - worker pays weekly premium via Razorpay Order + Checkout.
+ *   2. Claim payout        - GigShield transfers compensation to worker's bank account
  *                            via Razorpay Payouts API.
  *
  * STUB MODE
@@ -28,12 +28,12 @@ const IS_PAYMENT_STUB_MODE = !RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET;
 
 if (IS_PAYMENT_STUB_MODE) {
   console.warn(
-    '[PaymentService] Running in STUB mode â€” set RAZORPAY_KEY_ID and ' +
+    '[PaymentService] Running in STUB mode - set RAZORPAY_KEY_ID and ' +
       'RAZORPAY_KEY_SECRET in .env to enable live payments.'
   );
 }
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ================================== Helpers ==================================
 
 /**
  * Generates a stub transaction identifier for use during development.
@@ -114,7 +114,7 @@ function makeRazorpayApiRequest(method, apiPath, body) {
   });
 }
 
-// â”€â”€â”€ Premium Collection (Worker â†’ GigShield) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ===================== Premium Collection (Worker -> GigShield) =====================
 
 /**
  * Creates a Razorpay Order for collecting the weekly insurance premium.
@@ -198,7 +198,7 @@ function verifyPremiumPayment(
   return { isVerified, paymentId: razorpayPaymentId, isStub: false };
 }
 
-// â”€â”€â”€ Claim Payout (GigShield â†’ Worker) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ======================= Claim Payout (GigShield -> Worker) =======================
 
 /**
  * Initiates a bank transfer payout to the delivery partner using the
@@ -240,14 +240,14 @@ async function initiateClaimPayout(amountInRupees, claimId, beneficiaryDetails =
     };
   }
 
-  // Step 1 â€” Create a Razorpay Contact for the worker.
+  // Step 1 - Create a Razorpay Contact for the worker.
   const razorpayContact = await makeRazorpayApiRequest('POST', '/v1/contacts', {
     name: beneficiaryDetails.accountHolderName || 'GigShield Worker',
     type: 'employee',
     reference_id: `worker_${claimId}`,
   });
 
-  // Step 2 â€” Link their bank account as a Fund Account.
+  // Step 2 - Link their bank account as a Fund Account.
   const razorpayFundAccount = await makeRazorpayApiRequest(
     'POST',
     '/v1/fund_accounts',
@@ -262,7 +262,7 @@ async function initiateClaimPayout(amountInRupees, claimId, beneficiaryDetails =
     }
   );
 
-  // Step 3 â€” Create the payout.
+  // Step 3 - Create the payout.
   const razorpayPayout = await makeRazorpayApiRequest('POST', '/v1/payouts', {
     account_number: RAZORPAY_ACCOUNT_NUMBER,
     fund_account_id: razorpayFundAccount.id,
@@ -284,7 +284,7 @@ async function initiateClaimPayout(amountInRupees, claimId, beneficiaryDetails =
   };
 }
 
-// â”€â”€â”€ Exports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ================================== Exports ==================================
 
 module.exports = {
   createPremiumPaymentOrder,

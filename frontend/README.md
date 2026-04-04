@@ -35,8 +35,8 @@ npm run preview
 ## API Configuration
 
 - In development, Vite proxy routes:
-  - `/api` â†’ `http://localhost:5000`
-  - `/ai` â†’ `http://localhost:5001`
+  - `/api` -> `http://localhost:5000`
+  - `/ai` -> `http://localhost:5001`
 - For deployed environments, set values in `frontend/.env`:
   - `VITE_API_BASE_URL`
   - `VITE_AI_BASE_URL`

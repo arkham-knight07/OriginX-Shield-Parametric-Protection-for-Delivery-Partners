@@ -188,7 +188,7 @@ Trigger threshold snapshot:
 | Event | Trigger |
 |---|---|
 | Heavy Rain | Rainfall > 50 mm |
-| Extreme Heat | Temperature > 42Â°C |
+| Extreme Heat | Temperature > 42 C |
 | Hazardous Air Quality | AQI > 300 |
 | LPG Shortage | Severity Index > 70 |
 
@@ -248,13 +248,13 @@ RakshaRide leverages Guidewire as a coordinated insurance execution engine:
 
 ### Data Flow
 
-1. User registers â†’ KYC validation
-2. Policy created â†’ PolicyCenter
-3. Premium calculated â†’ rating engine
-4. Payment processed â†’ BillingCenter
-5. Event detected â†’ ClaimCenter FNOL
-6. Fraud scoring â†’ ML service
-7. Payout executed â†’ payment gateway
+1. User registers -> KYC validation
+2. Policy created -> PolicyCenter
+3. Premium calculated -> rating engine
+4. Payment processed -> BillingCenter
+5. Event detected -> ClaimCenter FNOL
+6. Fraud scoring -> ML service
+7. Payout executed -> payment gateway
 
 ### IRDAI Compliance Enforcement
 

@@ -4,7 +4,7 @@
  *
  * Values are based on the GigShield policy specification:
  *   - Rainfall threshold: 50 mm triggers compensation for heavy rain
- *   - Temperature threshold: 42 Â°C triggers compensation for extreme heat
+ *   - Temperature threshold: 42 C triggers compensation for extreme heat
  *   - AQI threshold: 300 triggers compensation for hazardous air quality
  *   - LPG shortage index: 70 triggers compensation for fuel scarcity disruption
  */
@@ -99,7 +99,7 @@ const PREMIUM_MODEL_ASSUMPTIONS = {
   DEFAULT_EXPECTED_DISRUPTION_DAYS_PER_MONTH: 3,
   EXPECTED_PAYOUT_SEVERITY_RATIO: 0.3,
   LOSS_RATIO_LOADING_FACTOR: 0.1,
-  // Payout guardrail band for disruption-based compensation (40%â€“60% of estimated loss window).
+  // Payout guardrail band for disruption-based compensation (40%-60% of estimated loss window).
   MINIMUM_DISRUPTION_PAYOUT_RATIO: 0.4,
   MAXIMUM_DISRUPTION_PAYOUT_RATIO: 0.6,
 };

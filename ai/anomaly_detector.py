@@ -8,7 +8,7 @@ a payout is approved.
 Detection checks performed:
   1. Claim frequency spike: delivery partner submitting too many claims in a
      short period compared to the population average.
-  2. Locationâ€“disruption mismatch: the partner's reported location at claim
+    2. Location-disruption mismatch: the partner's reported location at claim
      time is far from the epicentre of the recorded disruption event.
   3. Activity signal mismatch: delivery platform activity is inconsistent
      with the disruption window reported in the claim.
