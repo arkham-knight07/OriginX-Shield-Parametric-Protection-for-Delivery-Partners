@@ -152,10 +152,10 @@ Then:
 Current config source: `backend/config/parametricInsuranceConstants.js` (`PREMIUM_MODEL_ASSUMPTIONS.EXPECTED_PAYOUT_SEVERITY_RATIO = 0.30`).
 
 Using the same example with Standard plan coverage:
-- `C = 500`, `e = 0.30`, `Premium = 64`
-- `Projected Loss Ratio = (500 × 0.30) / 64 = 150 / 64 = 2.34` (rounded to 2.3 decimals)
+- `C = 500`, `e = 0.15`, `Premium = 64`
+- `Projected Loss Ratio = (500 × 0.15) / 64 = 75 / 64 = 1.17` (rounded to 1.2 decimals)
 
-Note: the resulting loss ratio of `2.34` in this worked example is included only
+Note: the resulting loss ratio of `1.2` in this worked example is included only
 to show the calculation path. In the current model, it is classified as
 `above_sustainable_band` and surfaced in `pricingJustification.lossRatioAssessment`.
 
