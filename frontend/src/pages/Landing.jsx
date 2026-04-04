@@ -22,10 +22,12 @@ const STEPS = [
 
 const STATS = [
   { value: '50M+',  label: 'Gig workers in India' },
-  { value: '700',  label: 'Max weekly payout' },
+  { value: '₹700',  label: 'Max weekly payout' },
   { value: '3',     label: 'Auto-trigger conditions' },
   { value: '< 1s',  label: 'Claim processing time' },
 ];
+
+const formatInr = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -135,7 +137,7 @@ export default function Landing() {
 
                 <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 12, padding: '1rem', marginBottom: '1rem' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--emerald)', fontWeight: 700, marginBottom: '0.25rem' }}>AUTO-PAYOUT TRIGGERED</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--emerald)' }}>350</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--emerald)' }}>{formatInr(350)}</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Credited to your account</div>
                 </div>
 
@@ -216,10 +218,10 @@ export default function Landing() {
                 <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{p.badge}</div>
                 <div style={{ fontWeight: 700, textTransform: 'capitalize', marginBottom: '0.25rem' }}>{p.tier}</div>
                 <div style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-1px', color: 'var(--amber)', marginBottom: '0.15rem' }}>
-                  {p.premium}<span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-secondary)' }}>/wk</span>
+                  {formatInr(p.premium)}<span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-secondary)' }}>/wk</span>
                 </div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
-                  Up to {p.coverage} coverage
+                  Up to {formatInr(p.coverage)} coverage
                 </div>
                 <button className={`btn btn-sm ${p.popular ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ width: '100%' }} onClick={() => navigate('/register')}>

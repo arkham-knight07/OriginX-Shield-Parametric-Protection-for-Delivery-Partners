@@ -12,19 +12,22 @@ function ProgressBar({ value, max, color = 'amber' }) {
   );
 }
 
+const formatInr = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
+const humanizeDisruptionType = (type = '') => String(type || '').replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+
 function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
   const DISRUPTION_TYPE_OPTIONS = [
-    'heavy_rainfall',
-    'extreme_heat',
-    'hazardous_air_quality',
-    'lpg_shortage',
-    'area_curfew',
-    'flooding',
-    'cyclone_alert',
-    'thunderstorm',
-    'waterlogging',
-    'road_blockage',
-    'other',
+    { value: 'heavy_rainfall', label: 'Heavy Rainfall' },
+    { value: 'extreme_heat', label: 'Extreme Heat' },
+    { value: 'hazardous_air_quality', label: 'Hazardous Air Quality' },
+    { value: 'lpg_shortage', label: 'LPG Shortage' },
+    { value: 'area_curfew', label: 'Area Curfew' },
+    { value: 'flooding', label: 'Flooding' },
+    { value: 'cyclone_alert', label: 'Cyclone Alert' },
+    { value: 'thunderstorm', label: 'Thunderstorm' },
+    { value: 'waterlogging', label: 'Waterlogging' },
+    { value: 'road_blockage', label: 'Road Blockage' },
+    { value: 'other', label: 'Other (Custom)' },
   ];
 
   const [form, setForm] = useState({
@@ -121,8 +124,8 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
             >
               <option value="">All event types</option>
               {DISRUPTION_TYPE_OPTIONS.map((typeOption) => (
-                <option key={typeOption} value={typeOption}>
-                  {typeOption.replace(/_/g, ' ')}
+                <option key={typeOption.value} value={typeOption.value}>
+                  {typeOption.label}
                 </option>
               ))}
             </select>
@@ -152,7 +155,7 @@ function ClaimModal({ partner, policy, events, onClose, onSuccess }) {
                 <option key={ev._id} value={ev._id}>
                   {(ev.disruptionType === 'other' && ev.customDisruptionTypeLabel
                     ? ev.customDisruptionTypeLabel
-                    : ev.disruptionType.replace(/_/g, ' '))}
+                    : humanizeDisruptionType(ev.disruptionType))}
                   {' '}- {ev.affectedCityName} ({new Date(ev.disruptionStartTimestamp).toLocaleDateString()})
                 </option>
               ))}
@@ -325,7 +328,7 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
             {claimResult && (
               <div className={`alert ${claimResult.wasAutoApproved ? 'alert-success' : 'alert-warning'}`}>
                 {claimResult.wasAutoApproved
-                  ? ` Claim approved! Payout of ${claimResult.claim?.approvedPayoutAmountInRupees || ''} initiated.`
+                  ? ` Claim approved! Payout of ${formatInr(claimResult.claim?.approvedPayoutAmountInRupees)} initiated.`
                   : ' Claim submitted and flagged for manual review.'}
               </div>
             )}
@@ -364,7 +367,7 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Total Received</div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--emerald)' }}>{totalCompensation.toLocaleString('en-IN')}</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--emerald)' }}>{formatInr(totalCompensation)}</div>
               </div>
             </div>
 
@@ -373,7 +376,7 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
               {[
                 { icon: '', cls: 'stat-icon-amber',   label: 'Total Claims',     value: claims.length },
                 { icon: '', cls: 'stat-icon-emerald',  label: 'Approved',         value: approvedClaims },
-                { icon: '', cls: 'stat-icon-sky',     label: 'Coverage Left',    value: policy ? `${policy.remainingCoverageInRupees}` : '' },
+                { icon: '', cls: 'stat-icon-sky',     label: 'Coverage Left',    value: policy ? formatInr(policy.remainingCoverageInRupees) : '' },
                 { icon: '', cls: 'stat-icon-indigo',  label: 'Policy Expires',   value: policy ? new Date(policy.policyEndDate).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : 'No policy' },
               ].map(s => (
                 <div className="card card-sm stat-card" key={s.label}>
@@ -394,8 +397,8 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
                   {[
                     ['Plan',        policy.selectedPlanTier ? policy.selectedPlanTier.charAt(0).toUpperCase() + policy.selectedPlanTier.slice(1) : ''],
-                    ['Weekly Premium', `${policy.weeklyPremiumChargedInRupees}`],
-                    ['Max Coverage',   `${policy.maximumWeeklyCoverageInRupees}`],
+                    ['Weekly Premium', formatInr(policy.weeklyPremiumChargedInRupees)],
+                    ['Max Coverage',   formatInr(policy.maximumWeeklyCoverageInRupees)],
                   ].map(([l, v]) => (
                     <div key={l}>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>{l}</div>
@@ -406,7 +409,7 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
                 <div style={{ marginBottom: '0.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Coverage remaining</span>
-                    <span style={{ fontWeight: 700 }}>{policy.remainingCoverageInRupees} / {policy.maximumWeeklyCoverageInRupees}</span>
+                    <span style={{ fontWeight: 700 }}>{formatInr(policy.remainingCoverageInRupees)} / {formatInr(policy.maximumWeeklyCoverageInRupees)}</span>
                   </div>
                   <ProgressBar
                     value={policy.remainingCoverageInRupees}
@@ -458,13 +461,13 @@ export default function Dashboard({ authenticatedPartnerId = '', authenticatedPa
                         {claims.map(c => (
                           <tr key={c._id}>
                             <td>
-                              <div className="td-name">{c.triggeringDisruptionEventId?.disruptionType?.replace(/_/g, ' ') || ''}</div>
+                              <div className="td-name">{humanizeDisruptionType(c.triggeringDisruptionEventId?.disruptionType) || ''}</div>
                               <div className="td-sub">{c.triggeringDisruptionEventId?.affectedCityName || ''}</div>
                             </td>
                             <td><StatusBadge status={c.currentClaimStatus} /></td>
-                            <td>{c.requestedCompensationAmountInRupees}</td>
+                            <td>{formatInr(c.requestedCompensationAmountInRupees)}</td>
                             <td style={{ color: 'var(--emerald)', fontWeight: 700 }}>
-                              {c.approvedPayoutAmountInRupees != null ? `${c.approvedPayoutAmountInRupees}` : ''}
+                              {c.approvedPayoutAmountInRupees != null ? formatInr(c.approvedPayoutAmountInRupees) : ''}
                             </td>
                             <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                               {new Date(c.claimSubmissionTimestamp).toLocaleDateString('en-IN')}

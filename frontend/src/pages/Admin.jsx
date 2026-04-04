@@ -8,18 +8,21 @@ import StatusBadge from '../components/StatusBadge';
 
 export default function Admin({ adminAccessToken, adminProfile, onAdminLogout }) {
   const DISRUPTION_TYPE_OPTIONS = [
-    'heavy_rainfall',
-    'extreme_heat',
-    'hazardous_air_quality',
-    'lpg_shortage',
-    'area_curfew',
-    'flooding',
-    'cyclone_alert',
-    'thunderstorm',
-    'waterlogging',
-    'road_blockage',
-    'other',
+    { value: 'heavy_rainfall', label: 'Heavy Rainfall' },
+    { value: 'extreme_heat', label: 'Extreme Heat' },
+    { value: 'hazardous_air_quality', label: 'Hazardous Air Quality' },
+    { value: 'lpg_shortage', label: 'LPG Shortage' },
+    { value: 'area_curfew', label: 'Area Curfew' },
+    { value: 'flooding', label: 'Flooding' },
+    { value: 'cyclone_alert', label: 'Cyclone Alert' },
+    { value: 'thunderstorm', label: 'Thunderstorm' },
+    { value: 'waterlogging', label: 'Waterlogging' },
+    { value: 'road_blockage', label: 'Road Blockage' },
+    { value: 'other', label: 'Other (Custom)' },
   ];
+
+  const humanizeDisruptionType = (type = '') => String(type || '').replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  const formatInr = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
 
   const [flagged,   setFlagged]   = useState([]);
   const [events,    setEvents]    = useState([]);
@@ -362,7 +365,7 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
                             {claim.deliveryPartnerId?.emailAddress}  {claim.deliveryPartnerId?.primaryDeliveryCity}
                           </div>
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                            {claim.triggeringDisruptionEventId?.disruptionType?.replace(/_/g, ' ')}  {claim.triggeringDisruptionEventId?.affectedCityName} {' '}
+                            {humanizeDisruptionType(claim.triggeringDisruptionEventId?.disruptionType)}  {claim.triggeringDisruptionEventId?.affectedCityName} {' '}
                             {new Date(claim.claimSubmissionTimestamp).toLocaleString('en-IN')}
                           </div>
                         </div>
@@ -375,7 +378,7 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
                           </div>
                           <div>
                             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '2px' }}>Requested</div>
-                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{claim.requestedCompensationAmountInRupees}</div>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{formatInr(claim.requestedCompensationAmountInRupees)}</div>
                           </div>
                         </div>
                       </div>
@@ -420,8 +423,8 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
                 <div className="form-group">
                   <label className="form-label">Type</label>
                   <select className="form-select" value={newEvent.disruptionType} onChange={e => setEvt('disruptionType', e.target.value)}>
-                    {DISRUPTION_TYPE_OPTIONS.map(t => (
-                      <option key={t} value={t}>{t.replace(/_/g,' ')}</option>
+                    {DISRUPTION_TYPE_OPTIONS.map((typeOption) => (
+                      <option key={typeOption.value} value={typeOption.value}>{typeOption.label}</option>
                     ))}
                   </select>
                 </div>
@@ -492,8 +495,8 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
                         <tr key={ev._id}>
                           <td>
                             {ev.disruptionType === 'other' && ev.customDisruptionTypeLabel
-                              ? <StatusBadge status={ev.customDisruptionTypeLabel} />
-                              : <StatusBadge status={ev.disruptionType} />}
+                              ? ev.customDisruptionTypeLabel
+                              : humanizeDisruptionType(ev.disruptionType)}
                           </td>
                           <td>{ev.affectedCityName}</td>
                           <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -647,7 +650,7 @@ export default function Admin({ adminAccessToken, adminProfile, onAdminLogout })
                     <tbody>
                       {adminUsers.map((adminUser) => (
                         <tr key={adminUser._id || adminUser.emailAddress}>
-                          <td>{adminUser.fullName}</td>
+                          <td>{adminUser.fullName || 'N/A'}</td>
                           <td>{adminUser.emailAddress}</td>
                           <td>{new Date(adminUser.createdAt).toLocaleDateString('en-IN')}</td>
                         </tr>

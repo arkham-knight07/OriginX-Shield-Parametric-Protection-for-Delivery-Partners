@@ -34,6 +34,7 @@ const PLANS = [
 ];
 
 const STEP_LABELS = ['Personal Details', 'Work Details', 'Choose Plan'];
+const formatInr = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
 
 export default function Register() {
   const navigate = useNavigate();
@@ -137,8 +138,8 @@ export default function Register() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
             {[
-              ['Weekly Premium', `${policy.weeklyPremiumChargedInRupees}`],
-              ['Max Coverage',   `${policy.maximumWeeklyCoverageInRupees}`],
+              ['Weekly Premium', formatInr(policy.weeklyPremiumChargedInRupees)],
+              ['Max Coverage',   formatInr(policy.maximumWeeklyCoverageInRupees)],
             ].map(([l, v]) => (
               <div key={l} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '0.85rem' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{l}</div>
@@ -292,9 +293,9 @@ export default function Register() {
                     <span style={{ fontSize: '1.4rem' }}>{p.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, textTransform: 'capitalize' }}>{p.tier}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Up to {p.coverage} coverage/week</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Up to {formatInr(p.coverage)} coverage/week</div>
                     </div>
-                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--amber)' }}>{p.premium}<span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>/wk</span></div>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--amber)' }}>{formatInr(p.premium)}<span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>/wk</span></div>
                   </label>
                 ))}
               </div>
